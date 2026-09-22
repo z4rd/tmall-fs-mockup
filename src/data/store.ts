@@ -13,8 +13,11 @@ export function parseStoreKey(value: string | undefined): StoreKey {
   return 'nike';
 }
 
-/** 该店的首页路由；主店三个入口（男子 / 女子 / 双 11）统一落男子首页。 */
-export function storeHomePath(store: StoreKey): string {
-  if (store === 'nike') return '/home/men';
+/**
+ * 该店的首页路由。主店挂着男子 / 女子 / 双 11 三个首页变体，`variant` 缺省时落男子；
+ * 传了就原样保留，免得从女子或双 11 的宝贝页返回时被甩回男子首页。
+ */
+export function storeHomePath(store: StoreKey, variant?: 'men' | 'women' | 'commercial'): string {
+  if (store === 'nike') return `/home/${variant ?? 'men'}`;
   return `/store/${store}`;
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import type { SportsTabPillGlass } from '../../data/sportsThemes';
 import { u } from '../../lib/u';
 import './PillTabs.css';
 
@@ -24,8 +25,8 @@ export type PillTabsProps = {
   getInactiveLabelColor?: (key: string) => string;
   /** bubble：未选中字色默认值，默认 #ffffff */
   inactiveLabelColor?: string;
-  /** bubble：选中胶囊玻璃色调，反相于面板（浅底配暗玻璃 / 深底配亮玻璃） */
-  bubbleActiveSkin?: 'onLight' | 'onDark';
+  /** bubble：选中胶囊玻璃档位（叠白 / 叠浅白 / 叠黑），按主题 key 取值 */
+  bubbleActiveGlass?: SportsTabPillGlass;
 };
 
 function widthAt(index: number, widths: number | number[]): number {
@@ -75,7 +76,7 @@ export function PillTabs({
   getActiveLabelColor,
   getInactiveLabelColor,
   inactiveLabelColor = '#ffffff',
-  bubbleActiveSkin = 'onDark',
+  bubbleActiveGlass = 'lightWhite',
 }: PillTabsProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -112,7 +113,10 @@ export function PillTabs({
           <span
             className="pill-tabs__active--skin"
             aria-hidden="true"
-            data-pill-skin={bubbleActiveSkin}
+            data-pill-glass={bubbleActiveGlass}
+            // 档位之外的逐主题微调挂钩。当前三档都由通用规则覆盖，无逐主题特例（训练原来那条
+            // 专属描边环已被结构式实现里的通用暗轮廓环取代），保留属性是为了调试与将来微调。
+            data-pill-theme={activeKey}
             style={{ left: u(activeBox.left), width: u(activeBox.width) }}
           />
         ) : null}

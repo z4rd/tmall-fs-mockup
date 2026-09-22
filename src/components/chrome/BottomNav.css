@@ -1,5 +1,5 @@
 /**
- * 数值全部量自 3.216x 原始截图（见 data/bottomNav.ts），此处直接以设计 px 书写，
+ * 数值全部量自各店导航条的 @3x 导出图（见 data/bottomNav.ts），此处直接以设计 px 书写，
  * 由 PostCSS 改写成 calc(N * var(--u))。
  */
 
@@ -14,6 +14,35 @@
 }
 
 /* 原图第 0/1/3 行亮度与条身完全一致，说明**没有**顶部分割线或投影。 */
+
+/* ---------- 逐店底色 ---------- */
+
+/*
+ * 这四种底色不是设计师刷的实色，而是半透明导航条透出页面内容的结果，所以只能取样近似。
+ * 取样点为各店 @3x 导出图上避开文字 / 分隔线 / 凸起图形的网格中值。
+ */
+
+/* Jordan：整体偏暖灰，越往右越亮。 */
+.bnav[data-store='jordan'] {
+  background: linear-gradient(90deg, #f5f3f1 0%, #f8f4f2 62%, #faf8f6 100%);
+}
+
+/* Kids：平涂，无渐变。`kids-center.png` 是不透明矩形切图，正是靠这一点看不出接缝。 */
+.bnav[data-store='kids'] {
+  background: #fcfcfc;
+}
+
+/* ACG：暖调米色，左上角最冷最白，右上角最暖，底边整体回暖。 */
+.bnav[data-store='acg'] {
+  background:
+    radial-gradient(
+      135% 190% at 0% 8%,
+      #fcfcfc 0%,
+      rgba(252, 252, 252, 0.88) 24%,
+      rgba(252, 252, 252, 0) 62%
+    ),
+    linear-gradient(180deg, #fef7eb 0%, #fefaf5 100%);
+}
 
 /* ---------- 分隔竖线 ---------- */
 
@@ -39,6 +68,29 @@
   justify-content: center;
   height: 49.4px;
   transform: translateX(-50%);
+}
+
+/* 中间那项在四店都是死区，不响应点击；文字项里也只有首页 / 宝贝可点。 */
+.bnav-item[data-dead='true'] {
+  cursor: default;
+}
+
+/*
+ * 按压态只给真能跳的那两项。
+ *
+ * 死区（中间项 + 新品 + 会员）必须**完全没有**按压反馈：给了就等于承诺点得动，
+ * 而它们在本轮是有意为之的死区。选择器因此要卡 `aria-disabled` 而不是 `data-dead` ——
+ * 「新品」「会员」没有 `center` 也不带 `dead` 以外的标记，两者取值一致，
+ * 但 `aria-disabled` 是由 `bottomNavTarget()` 的实际返回值推出来的，跟真实可点性同源。
+ *
+ * 只做 `:active`、不做 `:hover`，理由见 `styles/tokens.css` 的 `--press-*`。
+ */
+.bnav-item:not([aria-disabled='true']) {
+  transition: opacity var(--press-dur) ease-out;
+}
+
+.bnav-item:not([aria-disabled='true']):active {
+  opacity: var(--press-opacity);
 }
 
 .bnav-label {
@@ -79,9 +131,9 @@
   letter-spacing: -0.1px;
 }
 
-/* ---------- 中间「运动空间」胶囊 ---------- */
+/* ---------- 中间「运动空间」胶囊（主店） ---------- */
 
-.bnav-item[data-raised='true'] {
+.bnav-item[data-center='pill'] {
   /* 胶囊比文字项高，单独给高度让它按 y8.4 起始居中。 */
   height: 53.5px;
 }
@@ -110,4 +162,28 @@
   font-family: var(--font-cn);
   line-height: 1;
   letter-spacing: -0.2px;
+}
+
+/* ---------- 中间切图（Jordan / Kids） ---------- */
+
+/* 宽度由组件内联给成一整格（见 BottomNav.tsx），子元素再各自居中。 */
+.bnav-item[data-center='art'] {
+  display: block;
+  height: 70px;
+}
+
+.bnav-card,
+.bnav-art {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Jordan 的白卡实测为纯色 #FEFEFE，无描边无投影。 */
+.bnav-card {
+  background: #fefefe;
+}
+
+.bnav-art {
+  display: block;
 }

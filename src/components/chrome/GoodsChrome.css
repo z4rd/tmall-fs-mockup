@@ -1,15 +1,32 @@
-@import './TmallChrome.css';
-
-/* 宝贝页顶栏：与 `.cs` 同套 --collapse / --morph，高度略矮（无下拉直播间提示行）。 */
+/*
+ * 宝贝页顶栏：与 `.cs` 同套 --collapse / --morph，高度略矮（无下拉直播间提示行）。
+ *
+ * 与首页头最大的不同是**它没有深色态**。首页头顶着 hero 视频，所以 `useCollapsibleHeader`
+ * 在 scrollTop 0 时写 `data-chrome-dark='true'`；宝贝页四张分类稿（`4012:13619`、
+ * `4018:19240`、`4018:21622`、`4021:23599`）一律是白底 + 黑字 + 橙粉描边搜索胶囊，
+ * 从头到尾没有粉灰渐变。以前 `.gcs` 跟着那个全局属性走深色，白头就被这层渐变盖掉了
+ * （本轮 VQA 第 1 条）。现在浅色写进 `.gcs` 基态，不再读 `data-chrome-dark`——
+ * 那个属性仍由首页 `.cs` 使用，这里只是不订阅。
+ */
 .gcs {
   position: absolute;
   z-index: 40;
   top: 0;
   right: 0;
   left: 0;
-  height: calc((100 - 39 * var(--collapse, 0)) * var(--u));
+  /*
+   * 高度**恒 100**，不跟 `--collapse` 收缩。
+   *
+   * 首页头是 `139 − 39×collapse`（EXPANDED_H → COMPACT_H），那 39 就是「下拉进入店铺
+   * 直播间」提示行的高度；宝贝页头压根没有那一行，它本身就等于收起态的 100。此前这里
+   * 照抄了 `− 39×collapse`，于是滚起来之后头只剩 61，把整条搜索行（返回箭头 68、
+   * logo 61、搜索框 54..94、已关注 64、⋯ 76）连着 morph 动效一起裁没了 ——
+   * 本轮把搜索框从 61/35 改到母版的 54/40 之后，露出来的那 7px 顶边把这个老问题
+   * 显性化成了一道橙粉弧线。
+   */
+  height: calc(100 * var(--u));
   overflow: hidden;
-  color: #fff;
+  color: var(--color-black);
   contain: layout paint style;
   pointer-events: none;
 }
@@ -20,20 +37,9 @@
   pointer-events: auto;
 }
 
-:root[data-chrome-dark='false'] .gcs {
-  color: var(--color-black);
-}
-
 .gcs-bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(120% 130% at 88% 12%, #9b6f6b 0%, rgb(155 111 107 / 0%) 58%),
-    radial-gradient(110% 120% at 6% 78%, #8d8487 0%, rgb(141 132 135 / 0%) 62%),
-    linear-gradient(168deg, #5d6062 0%, #63696c 52%, #6f7477 100%);
-}
-
-:root[data-chrome-dark='false'] .gcs .gcs-bg {
   background: #fff;
   box-shadow: inset 0 -0.5px 0 rgb(17 17 17 / 8%);
 }
@@ -42,15 +48,25 @@
   position: relative;
 }
 
+/* 44×44 热区与按压态：同 `.cs-back`，padding 自己凑够 44 以免 svg 居中带来半像素偏移。 */
+/* top/left 由 `GoodsChrome.tsx` 内联为 `GCS_BACK_Y` / `BACK_X`，避免旧 CSS 块覆盖。 */
 .gcs-back {
   position: absolute;
-  top: 68px;
-  left: 16px;
+  z-index: 1;
+  display: block;
+  line-height: 0;
   color: inherit;
   border: none;
-  padding: 0;
+  /* no-scale */
+  margin: calc(-14 * var(--u)) calc(-14.5 * var(--u));
+  padding: 15px 14.5px;
   background: transparent;
   cursor: pointer;
+  transition: opacity var(--press-dur) ease-out;
+}
+
+.gcs-back:active {
+  opacity: var(--press-opacity);
 }
 
 .gcs-back svg {
@@ -67,54 +83,71 @@
   transform: translate3d(0, calc((1 - var(--morph, 0)) * 30 * var(--u)), 0);
 }
 
+/*
+ * 搜索框是**圆角矩形**，不是胶囊 —— 逐像素反解主店母版 `nike-category-top.png`：
+ * 矩形 x42..331 / y54.33..94.33（289×40），左右两侧竖直段各 24 高，
+ * 所以 (40 − 24) / 2 = **圆角 8**。四张母版一致。
+ *
+ * 白底 + 1px 橙→粉描边，渐变走左上→右下（顶边全程橙 #ef682b 上下浮动，底边由
+ * #f3a46d 过渡到 #ef6b94，右边框最饱和处 #ea4854 —— @3x 上 1px 线被抗锯齿冲淡，
+ * 端点取回 `#f96a0d` / `#ff5a9e`）。双层 gradient 是给圆角上渐变描边的常规做法：
+ * padding-box 那层画白底，border-box 那层只在 1px 边框区露出来。
+ */
 .gcs-pill {
   position: absolute;
-  top: 61px;
+  top: 54px;
   left: calc((42 + 54 * var(--morph, 0)) * var(--u));
   display: flex;
   align-items: center;
   width: calc((289 - 115 * var(--morph, 0)) * var(--u));
-  height: 35px;
-  border-radius: 100px;
-  background: rgb(17 17 17 / 22%);
-  padding: 0 44px 0 16px;
+  height: 40px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(135deg, #f96a0d 0%, #ff5a9e 100%) border-box;
+  padding: 0 40px 0 14.5px;
 }
 
-:root[data-chrome-dark='false'] .gcs .gcs-pill {
-  background: #f0f3f4;
+/*
+ * 12×12，实测 x56.67..68.67（距框内 14.67）、纵向与文字同心。
+ * 星与前缀之间的墨距 10.7，扣掉汉字左侧边距取 9.5；**前缀与关键词之间没有空隙**
+ * （母版上「推荐」与「一脚蹬运动鞋」是连排的），所以间距挂在星上而不是 flex gap。
+ */
+.gcs-sparkle {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-right: 9.5px;
+  color: #fd6302;
 }
 
-/* 主店宝贝分类稿：搜索胶囊为浅绿底（对齐 Figma Header2 男子主题）。 */
-:root[data-chrome-dark='false'] .gcs--nike .gcs-pill {
-  background: #e3f0ea;
+/* 关键词前的两个灰字，实测 #7c889c。 */
+.gcs-prefix {
+  flex: none;
+  color: #7c889c;
+  font-size: 14px;
+  font-family: var(--font-cn);
 }
 
+/* 关键词是橙色实字（#fd6302），不是首页那种半透明 placeholder。字号 14 走标定：@3x 母版
+   「一脚蹬运动鞋」墨框 84.7×12.67，14px/400 残差 1.41，14.5 与 13.5 都在 4.5 以上。 */
 .gcs-keyword {
   flex: 1;
   overflow: hidden;
-  opacity: 0.72;
+  color: #fd6302;
   font-size: 14px;
   font-family: var(--font-cn);
   white-space: nowrap;
 }
 
-.gcs-divider {
-  position: absolute;
-  top: 10px;
-  right: 38.5px;
-  width: 1px;
-  height: 15px;
-  background: currentColor;
-  opacity: 0.22;
-}
-
+/* 实测放大镜 16.7×16.4 @ x301..317.7、y66.3..82.7：纵向居中，右端距框内 13.3。 */
 .gcs-search {
   position: absolute;
-  top: 8.5px;
-  right: 11.5px;
-  width: 18px;
-  height: 18px;
-  opacity: 0.85;
+  top: 11px;
+  right: 12.3px;
+  width: 17px;
+  height: 17px;
 }
 
 .gcs-follow {
@@ -125,8 +158,8 @@
   height: 29px;
   border: none;
   border-radius: 100px;
-  background: rgb(255 255 255 / 26%);
-  color: inherit;
+  background: var(--color-gray-300);
+  color: #6f6f72;
   font-size: 12px;
   font-family: var(--font-cn);
   line-height: 29px;
@@ -134,11 +167,6 @@
   opacity: calc((var(--morph, 0) - 0.45) / 0.55);
   transform: translate3d(0, calc((1 - var(--morph, 0)) * 30 * var(--u)), 0);
   cursor: pointer;
-}
-
-:root[data-chrome-dark='false'] .gcs .gcs-follow {
-  background: var(--color-gray-300);
-  color: #6f6f72;
 }
 
 .gcs-dots {

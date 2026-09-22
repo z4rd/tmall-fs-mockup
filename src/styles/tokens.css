@@ -66,6 +66,18 @@
   --dur-lookbook-collapse: 320ms;
   --ease-lookbook-collapse: cubic-bezier(0.4, 0, 1, 1);
   --marquee-speed: 12.4; /* px per second at 375 design width */
+
+  /*
+   * 触屏按压态。
+   *
+   * 刻意只有 `:active`、没有 `:hover`：真机天猫是触屏环境本就没有 hover，而本原型里有
+   * 大量有意为之的死区（渲染了但没有 onClick 的 `.cs-follow` / `.cs-dots`、disabled 的
+   * 「穿搭」tab 等），hover 会把原型显得比实际更可交互，误导设计评审。
+   *
+   * 0.45 取 iOS 导航栏按钮按下时的墨色量级；90ms 只为抬手时不硬切，按下几乎是瞬时。
+   */
+  --press-opacity: 0.45;
+  --press-dur: 90ms;
 }
 
 /**

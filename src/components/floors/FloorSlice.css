@@ -9,8 +9,14 @@
   color: var(--color-gray-400);
 }
 
+/* 切图标题区常带 alpha，需透出页面灰底而非白底 */
 .floor-slice--has-img {
-  background: #fff;
+  background: var(--surface-page);
+}
+
+/* Tier C 官方店铺：圆角已烤进位图，外层只裁切溢出、不再叠 `radius-l2`。 */
+.floor-slice--embedded-card {
+  border-radius: 0;
 }
 
 .floor-slice__skeleton {
@@ -60,6 +66,14 @@
   border: none;
   background: transparent;
   cursor: pointer;
+}
+
+/* 品牌矩阵：三行横幅各一块热区，不用整层单按钮。 */
+.floor-slice__hit--row {
+  inset: auto;
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 
 .floor-slice__label {

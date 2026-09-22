@@ -4,12 +4,10 @@ import { showsPageBackChrome } from '../../router/backNavigation';
 import { useRouteLayerLocation } from '../../router/RouteLayerLocation';
 import './PageBackChrome.css';
 
-/**
- * 通用二级页左上角返回（与 `TmallChrome` 的 ← 同几何）。产品墙见 `ProductWall` 透明热区。
- */
+/** 通用二级占位页左上角返回（运动空间等）。产品墙见 `ProductWall` `.pw-back`。 */
 export function PageBackChrome() {
   const { pathname } = useRouteLayerLocation();
-  const { goBack } = usePageBack();
+  const { canBack, goBack } = usePageBack();
 
   if (!showsPageBackChrome(pathname)) return null;
 
@@ -18,6 +16,7 @@ export function PageBackChrome() {
       type="button"
       className="page-back-chrome"
       aria-label="返回"
+      disabled={!canBack}
       onClick={goBack}
     >
       <BackChevronIcon />

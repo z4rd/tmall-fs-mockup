@@ -60,7 +60,7 @@ export function BatteryIcon({ className }: { className?: string }) {
   );
 }
 
-/** header：返回箭头。 */
+/** header：返回箭头。几何由 `.cs-back` / `.gcs-back` 的 padding + margin 锚定，勿 flex 居中。 */
 export function BackChevronIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 15 14" aria-hidden="true">
@@ -82,6 +82,27 @@ export function SearchGlassIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 18 18" aria-hidden="true">
       <circle cx="7.6" cy="7.6" r="6.1" fill="none" stroke="currentColor" strokeWidth="1.6" />
       <path d="m12.3 12.3 4.2 4.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
+ * header：宝贝页搜索框左端的四芒星（「AI 推荐词」标记）。
+ *
+ * 母版是**描边**而非实心（@3x 放大可见中心镂空，笔画约 1.3 设计 px），四个尖角之间
+ * 是向内凹的弧。切图源见四张 `*-category-top.png` 的 x56.67..68.67 / y68.33..80.33，
+ * 实测 12×12。只在宝贝页出现，首页 chrome 没有这一枚。
+ */
+export function SparkleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 12 12" aria-hidden="true">
+      <path
+        d="M6 .6Q7 5 11.4 6Q7 7 6 11.4Q5 7 .6 6Q5 5 6 .6Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

@@ -1,6 +1,7 @@
+import { storeIdFromPath } from '../data/searchKeywords';
 import type { StoreKey } from '../data/store';
 import { parseStoreKey, storeHomePath } from '../data/store';
-import { goodsPath } from '../lib/goodsRoute';
+import { goodsBrowsePath, goodsContextFromPath, goodsPath } from '../lib/goodsRoute';
 import { getLastShopPath } from './shopContext';
 
 export type NavBackState = {
@@ -37,11 +38,25 @@ export function resolveListBackPath(
   return storeHomePath(store);
 }
 
-/** 宝贝页顶部返回：state → 最近店铺页 → 主店男子首页。 */
-export function resolveGoodsBackPath(state: unknown): string {
+/**
+ * 宝贝页顶部返回。
+ *
+ * 宝贝 / 分类是同一页里的两个 tab，所以分类态的 ← 先回本上下文的宝贝首页，再按一次才离开
+ * 宝贝页。browse 态才回店铺首页，且必须带上当前店铺 —— 此前这里只看 `getLastShopPath()`、
+ * 兜底写死 `/home/men`，深链或刷新后从 ACG / Jordan / Kids 的宝贝页返回会串到主店。
+ */
+export function resolveGoodsBackPath(pathname: string, state: unknown): string {
   const explicit = readBackTo(state);
   if (explicit) return explicit;
-  return getLastShopPath() ?? '/home/men';
+
+  const { store, family } = goodsContextFromPath(pathname);
+  const browse = goodsBrowsePath({ store, family });
+  if (pathname !== browse) return browse;
+
+  const home = storeHomePath(store, family);
+  const last = getLastShopPath();
+  // 最近店铺页只有在同属当前店铺时才可信，否则宁可回该店的规范首页。
+  return last && storeIdFromPath(last) === store ? last : home;
 }
 
 /** Bottom Nav 占位页等：回到最近店铺或索引。 */
@@ -81,7 +96,7 @@ export function resolvePageBackPath(ctx: PageBackContext): string | null {
   }
 
   if (pathname.startsWith('/goods')) {
-    return resolveGoodsBackPath(state);
+    return resolveGoodsBackPath(pathname, state);
   }
 
   return resolvePlaceholderBackPath();
@@ -100,11 +115,12 @@ export function showsSecondaryPageBack(pathname: string): boolean {
 }
 
 /**
- * 舞台层可见 ← 按钮：产品墙 Tier C 整屏位图已含原生返回，再叠矢量会重影，仅用页内透明热区。
+ * 舞台层 ←：占位页等。产品墙 `/list` 热区在 `ProductWall` 内与位图同层滚动，避免与
+ * 舞台层叠出重影；宝贝 / 店铺首页由 `GoodsChrome` / `TmallChrome` 承担。
  */
 export function showsPageBackChrome(pathname: string): boolean {
   if (!showsSecondaryPageBack(pathname)) return false;
-  if (pathname.startsWith('/list')) return false;
   if (pathname.startsWith('/goods')) return false;
+  if (pathname.startsWith('/list')) return false;
   return true;
 }

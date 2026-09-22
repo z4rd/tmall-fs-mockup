@@ -66,7 +66,8 @@ const COMMERCIAL: Floor[] = [
   { key: 'apparel-2', title: '必入服饰', height: 545 },
   { key: 'seasonal-picks', title: '夏季精选', height: 610 },
   { key: 'family-pack', title: '儿童专区', height: 552 },
-  { key: 'sports-zone', title: '运动专区', height: 747 },
+  // 切图 `sportszone.png` @3x 2109 → 703 设计高；Figma 帧 `2728:67874` 声明 747，以实导为准。
+  { key: 'sports-zone', title: '运动专区', height: 703 },
   { key: 'product-navigation', title: '商品导航', height: 514 },
   { key: 'store-navigation', title: '品牌矩阵', height: 320 },
 ];

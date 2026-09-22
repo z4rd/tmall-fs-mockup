@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import type { StoreTabItem } from '../../data/goods';
-import { goodsHeaderSearchSrc } from '../../data/goodsAssets';
 import { u } from '../../lib/u';
 import './StoreTabs.css';
 
@@ -13,17 +12,18 @@ export type StoreTabsProps = {
 };
 
 /**
- * 宝贝页一级 tab：`wrapped` 含搜索栏位图；`bare` 为 Kids 双行文案。
+ * 宝贝页的**族** tab：`wrapped` 是主店的选购男子 / 女子 / 儿童（双 11 态多一项双 11 专区），
+ * `bare` 是 Kids 的大童 / 幼童 / 婴童双行胶囊。
+ *
+ * 它上面那条「宝贝 / 分类」一级 tab 位图由 `GoodsPage` 直接渲染 —— 那条 ACG / Jordan 也有，
+ * 但那两店没有族维，不该为了一张图去实例化一个空的 `StoreTabs`。
  */
 export function StoreTabs({ variant, items, activeKey, isEnabled, onChange }: StoreTabsProps) {
   const itemW = variant === 'wrapped' ? 96 : 108;
-  const barH = variant === 'wrapped' ? 99 : 40;
+  const barH = variant === 'wrapped' ? 57 : 49;
 
   return (
     <div className={`store-tabs store-tabs--${variant}`} style={{ height: u(barH) }}>
-      {variant === 'wrapped' ? (
-        <img className="store-tabs__search" src={goodsHeaderSearchSrc()} alt="" decoding="async" />
-      ) : null}
       <div className={`store-tabs__row store-tabs__row--${variant}`}>
         {items.map((item, i) => {
           const enabled = isEnabled ? isEnabled(item.key) : true;

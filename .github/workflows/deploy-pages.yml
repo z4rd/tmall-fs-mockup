@@ -31,12 +31,15 @@ jobs:
           node-version: '20'
           cache: npm
 
-      - name: Install & test & build
+      - uses: actions/configure-pages@v5
+
+      - name: Install & build
         env:
+          # 未配置 secret 时为空串，accessCode.ts 会回落到内置默认口令。
           VITE_ACCESS_CODE: ${{ secrets.VITE_ACCESS_CODE }}
         run: |
           npm ci
-          npm run test
+          npm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:

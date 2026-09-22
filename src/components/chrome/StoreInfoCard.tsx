@@ -10,7 +10,6 @@ import iconShop from '../../assets/icons/icon-shop.png';
 import iconThumb from '../../assets/icons/icon-thumb.png';
 import tmallBadge from '../../assets/icons/tmall-badge.png';
 import stars from '../../assets/icons/stars.png';
-import shield from '../../assets/icons/shield.png';
 import './StoreInfoCard.css';
 
 /** 三条店铺数据，向左无限循环（§6.6）。逐店文案见 `data/storeIdentity.ts`。 */
@@ -120,7 +119,7 @@ export function StoreInfoCard() {
 
       {verified !== null && (
         <div className="sc-verified">
-          <img className="sc-shield" src={shield} alt="" aria-hidden="true" />
+          <span className="sc-shield" aria-hidden="true" />
           {verified}
         </div>
       )}

@@ -2,10 +2,13 @@ import { StoreInfoCard } from '../components/chrome/StoreInfoCard';
 import { FloorSlice } from '../components/floors/FloorSlice';
 import { LookbookGridFloor } from '../components/floors/LookbookGridFloor';
 import { SportsZoneFloor } from '../components/floors/SportsZoneFloor';
+import { useEffect } from 'react';
 import { FLOORS } from '../data/floors';
 import type { Gender, HomeVariant } from '../data/floors';
 import { floorRenderKind } from '../data/floorRender';
 import { CARD_Y } from '../data/chromeGeometry';
+import { preloadHomeP0, preloadHomeP1 } from '../lib/homePreload';
+import { scheduleBackgroundPreload } from '../lib/preloadAssets';
 import { u } from '../lib/u';
 import './Home.css';
 
@@ -20,6 +23,11 @@ function genderFromVariant(variant: HomeVariant): Gender | null {
  */
 export function Home({ variant }: { variant: HomeVariant }) {
   const gender = genderFromVariant(variant);
+
+  useEffect(() => {
+    preloadHomeP0(variant);
+    return scheduleBackgroundPreload(() => preloadHomeP1(variant));
+  }, [variant]);
 
   return (
     <div className="home">

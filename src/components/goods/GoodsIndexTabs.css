@@ -1,0 +1,77 @@
+/*
+ * 一级 tab「宝贝 / 分类（/ 穿搭）」。
+ *
+ * 全部数值来自 @3x 母版的逐像素反解（见组件注释）。容器必须是**不透明白底**：
+ * browse 根稿位图和 Kids 的 223 顶栏切图里都画着同一条位图 tab 行，靠这层盖掉。
+ */
+.goods-index-tabs {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #fff;
+  pointer-events: auto;
+}
+
+.goods-index-tabs__item {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-cn);
+  cursor: pointer;
+}
+
+.goods-index-tabs__item:disabled {
+  cursor: default;
+}
+
+/*
+ * 字号 15 是反解出来的：@3x 母版上「宝贝」墨框 27.67×13.67，用项目的 `--font-cn` 栈在
+ * 真浏览器里逐档量 canvas 墨框，15px 的残差 0.03px（14px 差 2.0、16px 差 1.1）。
+ * 文案墨框 y15.67..29.33 → 21 高的行盒放在 top 12，墨心落在 22.5，比行心低 1.5。
+ */
+.goods-index-tabs__label {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  width: 100%;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: center;
+}
+
+.goods-index-tabs__item.is-active .goods-index-tabs__label {
+  font-weight: 500;
+}
+
+/*
+ * 轨道底线：设计稿上这条线**整条轨道通铺**，选中那一段才压成深色。
+ *
+ * 四店母版在未选中列上量到的均值都是同一个 #f2f5f7（`jordan--featured` 分类稿、四张
+ * landing 根稿，采样脚本见 `agent-runs/2026-09-22-jordan-goods/scan_sheet.py`），
+ * 与选中段同 y、同 2px 高。browse / category 两态都画这条线，位图自带的那条由遮盖带
+ * （含 3px 过扫）盖掉，不会与它叠成两行。
+ */
+.goods-index-tabs__track {
+  position: absolute;
+  top: 40.5px;
+  right: 16px;
+  left: 16px;
+  height: 2px;
+  background: #f2f5f7;
+}
+
+/* 下划线宽度等于整列宽（主店 113.67 / 两 tab 店 171.33，各与列宽差 < 0.7px）。 */
+.goods-index-tabs__underline {
+  position: absolute;
+  top: 40.5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--text-primary);
+}

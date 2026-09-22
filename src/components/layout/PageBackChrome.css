@@ -1,16 +1,27 @@
+/*
+ * 占位页（运动空间等）：锚点与首页 `.cs-back` 接近，padding 外扩热区。
+ */
 .page-back-chrome {
   position: absolute;
-  z-index: 35;
-  top: 68px;
-  left: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin: -14px;
-  padding: 14px;
+  z-index: 45;
+  top: 52px;
+  left: 0;
+  display: block;
+  line-height: 0;
+  margin: 0;
+  padding: 16px;
   color: var(--text-primary);
+  touch-action: manipulation;
+  transition: opacity var(--press-dur) ease-out;
+}
+
+.page-back-chrome:active:not(:disabled) {
+  opacity: var(--press-opacity);
+}
+
+.page-back-chrome:disabled {
+  cursor: default;
+  opacity: 0.35;
 }
 
 .page-back-chrome svg {
@@ -18,3 +29,4 @@
   width: 15px;
   height: 14px;
 }
+

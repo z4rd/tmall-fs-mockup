@@ -2,10 +2,13 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { CategoryRail } from '../components/goods/CategoryRail';
+import { GoodsIndexTabs } from '../components/goods/GoodsIndexTabs';
+import { GoodsTopBand } from '../components/goods/GoodsTopBand';
 import { StoreTabs } from '../components/goods/StoreTabs';
 import {
   DEFAULT_CATEGORY,
   GOODS_STORES,
+  goodsSheetBottomClipPx,
   goodsCategoriesFor,
   goodsCategoryIsEnabled,
   goodsTabsForFamily,
@@ -14,22 +17,28 @@ import {
   type GoodsFamily,
   type KidsFamily,
 } from '../data/goods';
+import { GOODS_SHEET_EXPORTS, goodsLandingSrc, goodsSheetSrc } from '../data/goodsAssets';
 import {
-  GOODS_SHEET_EXPORTS,
-  goodsChromeTopSrc,
-  goodsLandingSrc,
-  goodsSheetSrc,
-} from '../data/goodsAssets';
-import { GOODS_CHROME_TOP_PX, goodsLandingDesign } from '../data/goodsLandingDesigns';
-import {
-  goodsDefaultCategoryPath,
-  goodsPath,
-  parseGoodsRoute,
-  type GoodsView,
-} from '../lib/goodsRoute';
+  GOODS_CHROME_TOP_PX,
+  GOODS_INDEX_TAB_COLUMNS,
+  goodsLandingDesign,
+} from '../data/goodsLandingDesigns';
+import { goodsBrowsePath, goodsPath, parseGoodsRoute } from '../lib/goodsRoute';
+import { preloadGoodsBrowseP0, preloadGoodsBrowseP1 } from '../lib/goodsBrowsePreload';
+import { scheduleBackgroundPreload } from '../lib/preloadAssets';
 import { u } from '../lib/u';
 import type { StoreKey } from '../data/store';
 import './GoodsPage.css';
+
+/**
+ * browse 遮盖带下缘的过扫量。
+ *
+ * `browseTabRowBottom` 记的是位图轨道底线的标称下沿（主店 / Jordan 265.5），而 @3x 母版上
+ * 这条线的抗锯齿尾巴要到 265.67；再叠加 stage 缩放（`--u` 非整数）的设备像素取整，遮盖带
+ * 下面就会漏出一行 #f2f5f7 —— 2026-09-22 反馈的「宝贝下划线底下那条预料外的灰线」。
+ * 四店位图在这条线以下都是纯白，多盖 1px 不会吃掉任何内容。
+ */
+const GOODS_INDEX_COVER_OVERSCAN_PX = 3;
 
 const SHEET_MOTION = {
   initial: { opacity: 0, y: 8 },
@@ -55,70 +64,21 @@ function sheetExportExists(route: {
   return false;
 }
 
-function GoodsSharedChrome({ store, view }: { store: StoreKey; view: GoodsView }) {
-  const topSrc = goodsChromeTopSrc(store, view);
-
+/**
+ * 223px 原生顶栏。两态共用，已由整幅切图换成活组件，理由见 `GoodsTopBand`。
+ *
+ * `.gcs` 画 0..100（状态栏 + 搜索行），`GoodsTopBand` 画 100..223（店铺卡 + 认证条 +
+ * 跑马灯数据条）。原来那四张 `*-category-top.png` 仍在仓库与资产校验表里作对照母版。
+ */
+function GoodsSharedChrome({ store }: { store: StoreKey }) {
   return (
     <div className="goods-page__chrome">
-      <img className="goods-page__top" src={topSrc} alt="" decoding="async" />
+      <GoodsTopBand store={store} />
     </div>
   );
 }
 
-function GoodsNativeTabHits({
-  store,
-  view,
-}: {
-  store: StoreKey;
-  view: GoodsView;
-}) {
-  const navigate = useNavigate();
-  const browsePath = goodsPath({ store, view: 'browse', category: '' });
-  const categoryPath = goodsDefaultCategoryPath(store);
-  /** 热区坐标逐店标定：四张根稿的 tab 行 y 与列宽都不一样，不能共用主店那一套。 */
-  const design = goodsLandingDesign(store);
-  const { goods, category } = design.tabs;
-
-  // category 态下 tab 行只有 Kids 还留在顶栏切图里；另外三店那块 y 已归 Header2 / 左导航。
-  if (view === 'category' && !design.tabRowInChromeCrop) return null;
-
-  return (
-    <div
-      className={`goods-page__native-tabs${view === 'browse' ? ' goods-page__native-tabs--landing' : ''}`}
-    >
-      <button
-        type="button"
-        className="goods-page__native-tab-hit"
-        style={{
-          left: u(goods.left),
-          width: u(goods.width),
-          top: u(goods.top),
-          height: u(goods.height),
-        }}
-        aria-label="宝贝"
-        onClick={() => {
-          if (view !== 'browse') navigate(browsePath, { replace: true });
-        }}
-      />
-      <button
-        type="button"
-        className="goods-page__native-tab-hit"
-        style={{
-          left: u(category.left),
-          width: u(category.width),
-          top: u(category.top),
-          height: u(category.height),
-        }}
-        aria-label="进入分类"
-        onClick={() => {
-          if (view !== 'category') navigate(categoryPath, { replace: true });
-        }}
-      />
-    </div>
-  );
-}
-
-function buildHeader2(
+function buildFamilyTabs(
   store: StoreKey,
   family: GoodsFamily | KidsFamily | undefined,
   navigate: ReturnType<typeof useNavigate>,
@@ -176,53 +136,73 @@ function buildHeader2(
 }
 
 /**
- * 四店共用宝贝页：browse 瀑布流 / category 顶栏 + `StoreTabs` / `CategoryRail` + 右侧切图列。
+ * browse 态：223 白头 + 整屏瀑布流位图 + 盖在位图自带 tab 行上的活组件。
+ *
+ * 遮盖带是**绝对定位**的，不占流 —— 位图整页的纵向对位因此一个像素都不动，
+ * 换活组件只影响那条 tab 行本身。
  */
-export function GoodsPage() {
-  const navigate = useNavigate();
-  const { p1, p2, p3 } = useParams<{ p1?: string; p2?: string; p3?: string }>();
+function GoodsBrowseView({
+  store,
+  family,
+}: {
+  store: StoreKey;
+  family?: GoodsFamily | KidsFamily;
+}) {
+  useEffect(() => {
+    preloadGoodsBrowseP0(store);
+    return scheduleBackgroundPreload(() => preloadGoodsBrowseP1(store, family));
+  }, [store, family]);
 
-  const parsed = parseGoodsRoute(p1, p2, p3);
-  if (!parsed) {
-    return <Navigate to="/goods" replace />;
-  }
+  const design = goodsLandingDesign(store);
+  const coverHeight =
+    Math.max(GOODS_INDEX_TAB_COLUMNS.rowHeight, design.browseTabRowBottom - design.indexTabRowTop) +
+    GOODS_INDEX_COVER_OVERSCAN_PX;
 
-  const store = parsed.store;
-  const view = parsed.view ?? 'category';
-  const storeConfig = GOODS_STORES[store];
+  return (
+    <div
+      className="goods-page goods-page--browse"
+      style={{ ['--goods-landing-tail' as string]: u(design.bottomClipPx ?? 0) }}
+    >
+      <GoodsSharedChrome store={store} />
 
-  if (view === 'browse') {
-    const landingSrc = goodsLandingSrc(store);
-    const design = goodsLandingDesign(store);
-    return (
-      <div className="goods-page goods-page--browse">
-        <GoodsSharedChrome store={store} view="browse" />
-        <div className="goods-page__landing-shell" style={{ height: u(design.height) }}>
-          <img className="goods-page__landing" src={landingSrc} alt="" decoding="async" />
-          <GoodsNativeTabHits store={store} view="browse" />
-        </div>
+      <div
+        className="goods-page__index-cover"
+        style={{ top: u(design.indexTabRowTop), height: u(coverHeight) }}
+      >
+        <GoodsIndexTabs store={store} family={family} view="browse" />
       </div>
-    );
-  }
 
-  const categories = goodsCategoriesFor(store, parsed.family);
-  const categoryValid = categories.some((c) => c.key === parsed.category);
-  const category = categoryValid
-    ? parsed.category
-    : categories[0]?.key ?? parsed.category;
+      <div className="goods-page__landing-shell">
+        <img className="goods-page__landing" src={goodsLandingSrc(store)} alt="" decoding="async" />
+      </div>
+    </div>
+  );
+}
 
-  const canonical = goodsPath({ ...parsed, category });
-  const pathKey = [p1, p2, p3].filter(Boolean).join('/');
-  const canonicalKey = canonical.replace(/^\/goods\/?/, '').replace(/\/$/, '');
+/**
+ * category 态：223 白头 + sticky `Header 2`（一级 tab + 族 tab）+ 左导航 + 右侧切图列。
+ *
+ * 几何对账只有两个自由度：`indexTabRowTop`（一级 tab 行顶边）与 `railTop`（左导轨起点）。
+ * `Header 2` 从 223 往上提 `223 − indexTabRowTop`、高度写死成 `railTop − indexTabRowTop`，
+ * 于是左导轨必然落在 `railTop`，不再依赖「族 tab 条恰好多高」这种隐式条件 ——
+ * ACG / Jordan 此前正是因为 `headerHeight: 53` 与 DOM 实际的 42 不一致，导轨高了 11px。
+ */
+function GoodsCategoryView({
+  store,
+  family,
+  category,
+}: {
+  store: StoreKey;
+  family?: GoodsFamily | KidsFamily;
+  category: string;
+}) {
+  const navigate = useNavigate();
+  const storeConfig = GOODS_STORES[store];
+  const design = goodsLandingDesign(store);
+  const categories = goodsCategoriesFor(store, family);
 
-  if (!categoryValid || pathKey !== canonicalKey) {
-    return <Navigate to={canonical} replace />;
-  }
-
-  const route = { store, family: parsed.family, category };
-
-  const sheetSrc = goodsSheetSrc(route);
-  const motionKey = `${store}/${parsed.family ?? ''}/${category}`;
+  const sheetSrc = goodsSheetSrc({ store, family, category });
+  const motionKey = `${store}/${family ?? ''}/${category}`;
 
   const [sheetReady, setSheetReady] = useState(false);
   const [sheetFailed, setSheetFailed] = useState(false);
@@ -243,56 +223,33 @@ export function GoodsPage() {
     return () => window.clearTimeout(t);
   }, [sheetSrc]);
 
-  const goGoods = (next: { family?: GoodsFamily | KidsFamily; category: string }) => {
-    navigate(
-      goodsPath({
-        store,
-        view: 'category',
-        family: next.family ?? parsed.family,
-        category: next.category,
-      }),
-      { replace: true },
-    );
-  };
-
-  const onCategory = (key: string) => {
-    goGoods({ category: key });
-  };
-
   const categoryEnabled = useMemo(
     () => (key: string) =>
-      goodsCategoryIsEnabled(
-        store,
-        parsed.family,
-        key,
-        sheetExportExists({ store, family: parsed.family, category: key }),
-      ),
-    [store, parsed.family],
+      goodsCategoryIsEnabled(sheetExportExists({ store, family, category: key })),
+    [store, family],
   );
 
-  const hasHeader2 =
-    (store === 'nike' && parsed.family && parseGoodsFamily(parsed.family)) ||
-    (store === 'kids' && Boolean(storeConfig.tabs));
-  const headerBlock = hasHeader2 ? (storeConfig.headerHeight ?? 0) : 0;
-  const catalogOffset = storeConfig.railTop - GOODS_CHROME_TOP_PX - headerBlock;
-  /** 切图自带顶栏 + Header2，这一段要被右侧栏盖掉（主店 325 - 223 = 102）。 */
+  const familyTabs = buildFamilyTabs(store, family, navigate);
+  /** 切图自带顶栏 + Header2，这一段要被右侧栏盖掉（主店 325 − 223 = 102）。 */
   const sheetHeadHeight = storeConfig.railTop - GOODS_CHROME_TOP_PX;
-
-  const header2 = buildHeader2(store, parsed.family, navigate);
-  const goodsBackTarget = canonical;
+  const sheetTailClip = goodsSheetBottomClipPx(store, category, family);
 
   return (
     <div
-      className="goods-page goods-page--category"
+      className={`goods-page goods-page--category${sheetTailClip > 0 ? ' goods-page--clipped-category' : ''}`}
       style={{
-        ['--goods-catalog-offset' as string]: u(catalogOffset),
+        ['--goods-header2-lift' as string]: u(GOODS_CHROME_TOP_PX - design.indexTabRowTop),
+        ['--goods-header2-height' as string]: u(storeConfig.railTop - design.indexTabRowTop),
         ['--goods-sheet-head' as string]: u(sheetHeadHeight),
+        ['--goods-sheet-tail' as string]: u(sheetTailClip),
       }}
     >
-      <GoodsSharedChrome store={store} view="category" />
-      <GoodsNativeTabHits store={store} view="category" />
+      <GoodsSharedChrome store={store} />
 
-      {header2 ? <div className="goods-page__header2">{header2}</div> : null}
+      <div className="goods-page__header2">
+        <GoodsIndexTabs store={store} family={family} view="category" />
+        {familyTabs}
+      </div>
 
       <div className="goods-page__catalog">
         <div className="goods-page__rail-col">
@@ -300,7 +257,11 @@ export function GoodsPage() {
             items={categories}
             activeKey={category}
             isEnabled={categoryEnabled}
-            onSelect={onCategory}
+            onSelect={(key) =>
+              navigate(goodsPath({ store, view: 'category', family, category: key }), {
+                replace: true,
+              })
+            }
           />
         </div>
 
@@ -335,7 +296,7 @@ export function GoodsPage() {
             className="goods-page__panel-hit"
             onClick={() =>
               navigate(`/list/${store}?from=goods-${category}`, {
-                state: { backTo: goodsBackTarget },
+                state: { backTo: goodsPath({ store, view: 'category', family, category }) },
               })
             }
             aria-label="进入产品墙"
@@ -344,4 +305,45 @@ export function GoodsPage() {
       </div>
     </div>
   );
+}
+
+/**
+ * 四店共用宝贝页的路由外壳：只做解析、收敛与规范化重定向，两个态各自是独立组件。
+ *
+ * 这个拆分是必需的，不是风格问题：browse 与 category 的 hook 数不同，而
+ * `routeMotionKey` 把整条宝贝页链路收敛成同一个 `AnimatePresence` key，两态切换时
+ * React 会复用同一个组件实例。之前两态写在一个函数里、browse 分支在 `useState` 之前
+ * 就 return，于是点一下「分类」就抛 React #310（Rendered more hooks…）整页白屏。
+ */
+export function GoodsPage() {
+  const { p1, p2, p3 } = useParams<{ p1?: string; p2?: string; p3?: string }>();
+
+  const parsed = parseGoodsRoute(p1, p2, p3);
+  if (!parsed) {
+    return <Navigate to="/goods" replace />;
+  }
+
+  const pathKey = [p1, p2, p3].filter(Boolean).join('/');
+  const segments = (path: string) => path.replace(/^\/goods\/?/, '').replace(/\/$/, '');
+  const view = parsed.view ?? 'category';
+
+  if (view === 'browse') {
+    // browse 也要收敛到规范路径，否则 `/goods/nike`、`/goods/men` 这些别名会停在非规范 URL 上。
+    const canonical = goodsBrowsePath(parsed);
+    if (pathKey !== segments(canonical)) {
+      return <Navigate to={canonical} replace />;
+    }
+    return <GoodsBrowseView store={parsed.store} family={parsed.family} />;
+  }
+
+  const categories = goodsCategoriesFor(parsed.store, parsed.family);
+  const categoryValid = categories.some((c) => c.key === parsed.category);
+  const category = categoryValid ? parsed.category : categories[0]?.key ?? parsed.category;
+  const canonical = goodsPath({ ...parsed, category });
+
+  if (!categoryValid || pathKey !== segments(canonical)) {
+    return <Navigate to={canonical} replace />;
+  }
+
+  return <GoodsCategoryView store={parsed.store} family={parsed.family} category={category} />;
 }

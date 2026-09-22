@@ -70,15 +70,29 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* 运动专区 Tab - Sports：透明轨道 + 52/80/94×32 玻璃选中胶囊（Figma 4020:9323 / 4020:9398） */
+/*
+ * 运动专区 Tab - Sports：透明轨道 + 玻璃选中胶囊。
+ * 胶囊宽由 sportsThemes.ts 算出（字进宽 + 2×18.5，下限 72 → 72 / 93 / 100），高恒 32。
+ */
 .pill-tabs--bubble {
   /* 字色变量由外层（如 .sports-zone__tabs）注入；勿在此重定义，否则会盖住继承值 */
   box-sizing: border-box;
   display: flex;
   align-items: center;
   width: 100%;
-  height: 32px;
-  padding: 0;
+  /*
+   * 32 的内容高 + 上下各 2 的内边距 = 36 的边框高。
+   *
+   * `.pill-tabs` 是横向滚动容器（overflow-x:auto / overflow-y:hidden），**裁剪盒就是它的
+   * padding box**。这里原本 height:32 / padding:0，裁剪盒与选中胶囊的 border box 严丝合缝，
+   * 于是胶囊画在 border box 之外的那圈 1px 暗轮廓环被整整裁掉 —— 实测下半圈完全消失
+   * （上半圈因为裁剪盒像素对齐时的取整侥幸留下一条，更有迷惑性）。
+   * 撑开 padding 只改裁剪盒，不改内容盒：父级 `.sports-zone__tabs` 高 32 且 align-items:center，
+   * 36 的本元素被居中后内容盒仍从 0 开始，胶囊的 y 一点没动；padding 只给纵向，
+   * clientWidth / scrollWidth 与宽度规则也都不受影响。
+   */
+  height: 36px;
+  padding: 2px 0;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -88,6 +102,12 @@
 }
 
 .pill-tabs--bubble .pill-tabs__track {
+  /*
+   * 轨道是 flex item，默认 flex-shrink:1 会把显式宽度（七个 tab 共 524）压回容器宽（337），
+   * 于是 scrollWidth == clientWidth、横向滚不动。子项全是绝对定位、min-content 为 0，
+   * 压缩时也不会被撑开，所以必须显式关掉收缩。
+   */
+  flex: none;
   height: 32px;
 }
 
@@ -102,7 +122,16 @@
   font-weight: 500;
   letter-spacing: 0;
   line-height: 21px;
-  transition: color 200ms linear;
+  /*
+   * 运动专区现在是**恒定布局**（每个 tab 按自己的标签定宽，与选中无关，见 sportsThemes.ts），
+   * 所以换选中项时 left/width 根本不变，这两条过渡在那里是空跑。保留是因为 PillTabs 是
+   * 通用组件：一旦某个调用方给出随状态变化的 itemWidth/step，left/width 就必须和选中胶囊
+   * 走同一条曲线（300ms linear），否则按钮瞬移、胶囊滑行，两者会错开一帧到 300ms。
+   */
+  transition:
+    color 200ms linear,
+    left 300ms linear,
+    width 300ms linear;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -125,17 +154,55 @@
 }
 
 /*
- * 选中胶囊 = Figma Liquid Glass Regular Small（BG 4020:9323 / 4020:9398，两者同为 Light 变体，
- * Fill + Shadow 完全一致，所以只有一套玻璃，没有浅底 / 深底两张皮）。
+ * 选中胶囊 = Figma Liquid Glass Regular Small，按主题分**三档**（见 sportsThemes.ts）：
+ *   叠白   white      BG 4001:19378  → 跑步 / 训练
+ *   叠浅白 lightWhite BG 4020:9323   → 篮球 / 足球 / 网球
+ *   叠黑   black      BG 4003:20247  → 休闲穿搭 / ACG 户外
  *
- * 玻璃的本质是**去饱和**，不是压暗或提亮。按整帧渲染的完整 RGB 实测：
- *   跑步 Volt 面板 rgb(220,255,0) → 胶囊 rgb(224,240,120)：亮度几乎不变，蓝通道 0→120
- *   篮球 中性黑 rgb(17,17,17)   → 胶囊 rgb(39,39,39)：三通道同步 +22
- * 解出同时满足两者的单一模型：去饱和到 .48 + 9.2% 白，三通道残差均在 3/255 内。
- * 深浅两种底共用这一套，与 Figma 只有一个 variantMode="Light" 变体自洽。
+ * ── 为什么是「结构式」而不是单层平叠色 ─────────────────────────────────
+ * 前三轮都把胶囊做成一层半透明色（外加一道两段渐变），并用「与设计稿的平均通道差」
+ * 验收，压到 1~3/255 就算过。指标选错了：一层平的半透明色能在均值上完美命中，同时
+ * 完全没有玻璃观感 —— 玻璃的观感全在高光和轮廓这些**结构特征**上，而平均色对它们
+ * 不敏感。成品实际观感是「几乎没有玻璃特效」，残差表却全绿，两者可以同时成立。
  *
- * 不要再用 pill-light.png / pill-dark.png 的 151 / 57 反推 alpha —— 那是 Figma 在无背景时的
- * 退化渲染，不是真实合成值。`data-pill-skin` 目前只作 DevTools 标记，不参与取值。
+ * 真值改用**用户从 Figma 画布直接屏幕截的三张图**（每档各一张，见
+ * agent-runs/2026-09-22-pill-glass/figma-capture/）。MCP 渲染导出的 PNG 不再作为真值：
+ * 带玻璃的帧反复渲染超时，管道还会做色域转换，很可能已经把 Liquid Glass 拍平。
+ *
+ * 三档真值剖面共同的**四层结构**（垂直中线，从外到内）：
+ *   1. 一圈比面板更暗的 1px 轮廓          → `0 0 0 1px` 硬轮廓环（画在 border-box 外）
+ *   2. 紧贴上缘一条 1px 镜面高光          → `inset 0 1px 0` 白色亮线
+ *   3. 本体命一个浅 V：顶稍亮 → 约 1/4 处最暗 → 往下单调渐亮 → `background-image` 多停渐变
+ *   4. 紧贴下缘一条边缘光，之后才是底部暗轮廓 → `inset 0 -1px 0` 白色亮线
+ *
+ * 这四层对应 Figma 组件参数里的 Opacity 25 / Frost 6 / Refraction / Depth / Splay /
+ * Dispersion：Frost 是 backdrop 模糊；Refraction + Depth 在边缘把背景折射压暗，形成
+ * 外轮廓和本体上部的下凹；Splay 把折射亮部甩到上下缘，就是那两条镜面亮线。
+ * 但**不**直译 Figma 的图层栈与 `mix-blend-mode`：上一轮已证实 Figma 渲染器的
+ * plus-lighter / luminosity 与 CSS Compositing 规范不等价，且本元素带 z-index +
+ * backdrop-filter，必然形成层叠上下文，`mix-blend-mode` 会被隔离。
+ *
+ * ── 参数从哪来（含色彩管理）─────────────────────────────────────────
+ * 真值是屏幕截图，通道值在显示空间而非 sRGB：volt 面板读到 (221,251,60)，源色
+ * (220,255,0)；ACG 读到 (255,110,62)，源色 (252,114,51)。**绝对数值不能当目标值。**
+ * 试过把它当「Display P3 编码的 sRGB 内容」反解（colorspace.py），中性灰与纯白能对上，
+ * 但饱和色对不上（volt 蓝差 22、ACG 红差 20），所以不存在可用的解析逆变换。
+ *
+ * 改成两条都不依赖色域的路子：
+ *   - **篮球档的面板与整个胶囊都是中性灰**，而该变换对中性灰恒等（实测 17→17、
+ *     255→255），所以叠浅白档可以直接在 sRGB 里精确定参。本体 V 的 5 个停靠点就是
+ *     按 out = 17·(1-a) + C·a、a=.553 从实测 47/40/46/52/64 逐点反解出的 71/59/69/81/102，
+ *     其均值 65 与前一轮独立拟合的 C=65 吻合 —— 互为交叉验证。
+ *   - **两条亮线与暗轮廓环写成「相对量」**（白/黑叠加的 alpha），不写绝对色。同一个
+ *     alpha 在越暗的面板上自然得到越大的绝对提亮量，正好解释实测的跨档差异：
+ *     上缘高光取白 .19，则篮球 47→86.5（实测 84）、ACG 的 G/B 通道反解也恰是 .18~.20；
+ *     下缘边缘光取白 .12~.13，则篮球 64→87（实测 87）。
+ * 叠白 / 叠黑两档的本体基色沿用前一轮的 (a, C)（叠白 a=.525 C≈239、叠黑 a=.605 C≈27）——
+ * 这两个值被新真值独立佐证（ACG 实测本体 (116,54,32) vs 该拟合预测 (115,60,34)），
+ * 只是在其上按篮球档标定出的同一条 V 形轨迹展开。
+ *
+ * 验收不再看平均通道差，改为从真浏览器渲染抽同一条垂直中线剖面，逐层比对四层结构
+ * 是否存在、以及提亮量是否同量级。对照表见 agent-runs/2026-09-22-pill-glass/REPORT.md。
  */
 .pill-tabs--bubble .pill-tabs__active--skin {
   position: absolute;
@@ -144,20 +211,93 @@
   height: 32px;
   border-radius: 16px;
   pointer-events: none;
-  -webkit-backdrop-filter: blur(6px) saturate(0.48);
-  backdrop-filter: blur(6px) saturate(0.48);
-  /* 白叠加沿纵向 9.2% → 17%，末段回落，与两张稿一致的顶暗底亮走向。 */
+  /* 七张稿的 tab 条底色都是纯色，模糊在那里不改变合成值；保留它是为了胶囊滑过非纯色区域时仍是玻璃。 */
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  /*
+   * 第 3 层：本体的浅 V。22%~30% 是最暗平台（三档真值的最暗点分别落在 24% / 27% / 19~26%，
+   * 是个平台而不是单点），之后单调渐亮，最后 15% 加速 —— 下缘边缘光的辉光段。
+   */
   background-image: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.092) 20%,
-    rgba(255, 255, 255, 0.13) 65%,
-    rgba(255, 255, 255, 0.17) 92%,
-    rgba(255, 255, 255, 0.1) 100%
+    var(--pill-glass-top) 0%,
+    var(--pill-glass-dip) 22%,
+    var(--pill-glass-dip) 30%,
+    var(--pill-glass-mid) 62%,
+    var(--pill-glass-low) 86%,
+    var(--pill-glass-bottom) 100%
   );
-  /* 顶沿镜面高光：篮球稿实测 62，等效白 .19。 */
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.19);
+  box-shadow:
+    /* 第 1 层：外缘暗轮廓环。画在 border-box 之外，所以胶囊连轮廓共 34px 高，与真值一致 */
+    0 0 0 1px var(--pill-glass-rim),
+    /* 第 2 层：上缘 1px 镜面高光 */ inset 0 1px 0 var(--pill-glass-spec),
+    /* 第 4 层：下缘 1px 边缘光 */ inset 0 -1px 0 var(--pill-glass-edge),
+    0 8px 15px var(--pill-glass-drop);
   transition:
     left 300ms linear,
     width 300ms linear;
+}
+
+/*
+ * 叠白：跑步 / 训练。
+ * 本体基色 a=.525、C 由 239 展开成 228(最暗)~255(下缘辉光已压到纯白)。
+ * 暗轮廓环 alpha 只有 .05：volt 面板 (220,255,0) × .95 = (209,242,0)，实测 (210,239,57)
+ * 的 R/G 通道正是这个值 —— 亮面板上折射压暗本来就弱，不能照搬深色档的 .4+。
+ */
+.pill-tabs--bubble .pill-tabs__active--skin[data-pill-glass='white'] {
+  --pill-glass-top: rgba(238, 238, 238, 0.525);
+  --pill-glass-dip: rgba(228, 228, 228, 0.525);
+  --pill-glass-mid: rgba(236, 236, 236, 0.525);
+  --pill-glass-low: rgba(247, 247, 247, 0.525);
+  --pill-glass-bottom: rgba(255, 255, 255, 0.525);
+  --pill-glass-rim: rgba(0, 0, 0, 0.05);
+  /*
+   * 这一档的两条亮线 alpha 明显高于另两档，是有原因的，别「统一」回 .19：
+   * 叠白档的本体本身已经接近白（volt 面板上合成到亮度 236），白色叠加的提亮空间只剩
+   * 255-236=19，用另两档的 .19 只能抬 +0.6 亮度 —— 实测渲染里那条高光肉眼完全看不见。
+   * 真值在 volt 上的高光是 (252,250,164)、比本体亮 +10.6 亮度，反解白叠加需要 alpha≈.42。
+   * （叠白档本来就不存在「一个 alpha 对齐所有通道」的解：R 通道要 .86、B 通道只要 .23，
+   * 说明 Figma 那层不是纯白叠加。既然只能取舍，就对齐肉眼可见的亮度提升量。）
+   */
+  --pill-glass-spec: rgba(255, 255, 255, 0.42);
+  --pill-glass-edge: rgba(255, 255, 255, 0.15);
+  --pill-glass-drop: rgba(0, 0, 0, 0.02);
+}
+
+/*
+ * 叠浅白：篮球 / 足球 / 网球。这一档的面板与胶囊全是中性灰，屏幕截图的显示变换对
+ * 中性灰恒等，所以五个停靠点是从实测值精确反解的，不含任何跨色域推断：
+ *   实测 47 / 40 / 46 / 52 / 64  --(out = 17·.447 + C·.553)-->  C = 71 / 59 / 69 / 81 / 102
+ * 暗轮廓环 .47：17 × .53 = 9，实测 9。上缘高光白 .19：47 + .19×208 = 86.5，实测 84。
+ * 下缘边缘光白 .12：64 + .12×191 = 87，实测 87。
+ */
+.pill-tabs--bubble .pill-tabs__active--skin[data-pill-glass='lightWhite'] {
+  --pill-glass-top: rgba(71, 71, 71, 0.553);
+  --pill-glass-dip: rgba(59, 59, 59, 0.553);
+  --pill-glass-mid: rgba(69, 69, 69, 0.553);
+  --pill-glass-low: rgba(81, 81, 81, 0.553);
+  --pill-glass-bottom: rgba(102, 102, 102, 0.553);
+  --pill-glass-rim: rgba(0, 0, 0, 0.47);
+  --pill-glass-spec: rgba(255, 255, 255, 0.19);
+  --pill-glass-edge: rgba(255, 255, 255, 0.12);
+  --pill-glass-drop: rgba(0, 0, 0, 0.02);
+}
+
+/*
+ * 叠黑：休闲穿搭 / ACG 户外。外投影比另两档重一倍，红 / 橙底上肉眼可见一圈暗缘。
+ * 本体基色 a=.605、C 由 27 展开。ACG 实测把 C 轨迹反解出来是「最暗→下缘 +31」，
+ * 与篮球档标定的 +43 同量级但略缓，所以这一档的 bottom 只推到 58 而不是按比例外推。
+ * 暗轮廓环 .40 是从 ACG 未被裁剪的 G/B 通道反解的（44/110 = 25/62 = .40）。
+ */
+.pill-tabs--bubble .pill-tabs__active--skin[data-pill-glass='black'] {
+  --pill-glass-top: rgba(32, 32, 32, 0.605);
+  --pill-glass-dip: rgba(27, 27, 27, 0.605);
+  --pill-glass-mid: rgba(33, 33, 33, 0.605);
+  --pill-glass-low: rgba(44, 44, 44, 0.605);
+  --pill-glass-bottom: rgba(58, 58, 58, 0.605);
+  --pill-glass-rim: rgba(0, 0, 0, 0.4);
+  --pill-glass-spec: rgba(255, 255, 255, 0.19);
+  --pill-glass-edge: rgba(255, 255, 255, 0.13);
+  --pill-glass-drop: rgba(0, 0, 0, 0.04);
 }
 

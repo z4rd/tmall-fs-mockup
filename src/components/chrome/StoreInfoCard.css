@@ -99,20 +99,29 @@
   align-items: center;
   gap: 6px;
   margin: 9px 16px 0;
-  border-radius: 8px;
+  /* 圆角量自 `jordan-category-top.png`：@3x 左上角边缘在 11 行内从 x56 收到 x48，即 @1x 约 4。 */
+  border-radius: 4px;
   background: #1d2433;
   padding: 0 12px;
   height: 27px;
-  color: #fff;
+  color: #f4dbbf;
   font-size: 12px;
   font-family: var(--font-cn);
 }
 
 /* 切片带 alpha，底色由下面的深色条透出来。 */
+/*
+ * 盾牌切图本身是一整块实心 RGB(242,236,224) 压在 alpha 上，没有内部色彩层次，所以走
+ * mask 取形状、颜色交给 `currentColor` —— 这样它永远跟着认证条的文字色，不会再像之前那样
+ * 图标暖白、文字纯白地各走各的。
+ */
 .sc-shield {
   flex: none;
   width: 13.4px;
   height: 11.8px;
+  background-color: currentColor;
+  -webkit-mask: url('../../assets/icons/shield.png') no-repeat center / contain;
+  mask: url('../../assets/icons/shield.png') no-repeat center / contain;
 }
 
 /* ---------- 店铺数据走马灯 ---------- */

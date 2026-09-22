@@ -1,4 +1,5 @@
-import { HeroVideo } from '../components/media/HeroVideo';
+import { useEffect } from 'react';
+import { AcgHeroFloor } from '../components/floors/AcgHeroFloor';
 import { FloorSlice } from '../components/floors/FloorSlice';
 import { StoreInfoCard } from '../components/chrome/StoreInfoCard';
 import { CARD_Y } from '../data/chromeGeometry';
@@ -7,6 +8,8 @@ import {
   STORE_FLOOR_GAP,
   type StoreVariant,
 } from '../data/storeFloors';
+import { preloadStoreHomeP0, preloadStoreHomeP1 } from '../lib/storeHomePreload';
+import { scheduleBackgroundPreload } from '../lib/preloadAssets';
 import { u } from '../lib/u';
 import './StoreHome.css';
 
@@ -15,14 +18,22 @@ type StoreHomeProps = {
 };
 
 /**
- * ACG / Jordan / Kids 店铺首页：Tier C 楼层切图；ACG 首层 hero 为实拍视频。
+ * ACG / Jordan / Kids 店铺首页：Tier C 楼层切图；ACG 首层 hero 是实拍视频 + DOM 叠层（Tier B）。
  */
 export function StoreHome({ variant }: StoreHomeProps) {
   const floors = STORE_FLOORS[variant];
   const gap = STORE_FLOOR_GAP[variant];
 
+  useEffect(() => {
+    preloadStoreHomeP0(variant);
+    return scheduleBackgroundPreload(() => preloadStoreHomeP1(variant));
+  }, [variant]);
+
   return (
-    <div className="store-home" style={{ ['--store-floor-gap' as string]: u(gap) }}>
+    <div
+      className={`store-home store-home--${variant}`}
+      style={{ ['--store-floor-gap' as string]: u(gap) }}
+    >
       <div style={{ height: u(CARD_Y) }} aria-hidden="true" />
       <StoreInfoCard />
       <div className="store-home__main">
@@ -34,11 +45,7 @@ export function StoreHome({ variant }: StoreHomeProps) {
                 className="store-home__hero"
                 style={{ height: u(floor.height) }}
               >
-                <HeroVideo
-                  src="./videos/acg-hero.mp4"
-                  posterWebp="./videos/acg-hero-poster.webp"
-                  posterJpg="./videos/acg-hero-poster.jpg"
-                />
+                <AcgHeroFloor />
               </section>
             );
           }

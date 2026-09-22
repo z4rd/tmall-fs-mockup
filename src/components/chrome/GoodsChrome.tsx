@@ -1,10 +1,18 @@
 import { usePageBack } from '../../hooks/usePageBack';
 import { StatusBar } from './StatusBar';
 import { StoreLogoTile } from './StoreLogoTile';
-import { BackChevronIcon, SearchGlassIcon, DotsMenuIcon } from '../icons/PlaceholderIcons';
+import {
+  BackChevronIcon,
+  SearchGlassIcon,
+  DotsMenuIcon,
+  SparkleIcon,
+} from '../icons/PlaceholderIcons';
 import { useCollapsibleHeader } from '../../hooks/useCollapsibleHeader';
 import { useRotatingKeyword } from '../../hooks/useRotatingKeyword';
-import type { StoreId } from '../../data/searchKeywords';
+import { BACK_X, GCS_BACK_Y } from '../../data/chromeGeometry';
+import { u } from '../../lib/u';
+import { SEARCH_PREFIX, type StoreId } from '../../data/searchKeywords';
+import './TmallChrome.css';
 import './GoodsChrome.css';
 
 /**
@@ -21,8 +29,14 @@ export function GoodsChrome({ storeId = 'nike' }: { storeId?: StoreId }) {
 
       <StatusBar />
 
-      <div className="gcs-searchrow">
-        <button type="button" className="gcs-back" aria-label="返回" onClick={goBack}>
+      <div className="cs-searchrow">
+        <button
+          type="button"
+          className="gcs-back"
+          aria-label="返回"
+          onClick={goBack}
+          style={{ top: u(GCS_BACK_Y), left: u(BACK_X) }}
+        >
           <BackChevronIcon />
         </button>
 
@@ -30,9 +44,11 @@ export function GoodsChrome({ storeId = 'nike' }: { storeId?: StoreId }) {
           <StoreLogoTile store={storeId} size={36} radius={8} />
         </div>
 
+        {/* 三段式：四芒星 + 灰色前缀 + 橙色轮播关键词。母版没有分隔竖线。 */}
         <div className="gcs-pill">
+          <SparkleIcon className="gcs-sparkle" />
+          <span className="gcs-prefix">{SEARCH_PREFIX[storeId]}</span>
           <span className="gcs-keyword" ref={keywordRef} />
-          <span className="gcs-divider" />
           <SearchGlassIcon className="gcs-search" />
         </div>
 

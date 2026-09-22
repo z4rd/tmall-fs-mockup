@@ -28,6 +28,23 @@ export const KEYWORD_ROTATE_MS = 3000;
  * 词库。换词是 **1 帧硬切、无任何过渡动画**（tmallref2 逐帧实测），
  * 所以渲染侧不要加 fade / slide / transition。
  */
+/**
+ * 宝贝页搜索框里关键词**前面那两个灰字**。
+ *
+ * 只有宝贝页有这一段：四张 `*-category-top.png` 母版上，胶囊里是
+ * 「✦ + 灰色前缀 + 橙色关键词」三段式（主店「推荐」、Jordan 与 ACG「精选」、Kids「试试」），
+ * 而首页 chrome 的胶囊里只有一段灰色 placeholder。所以这张表不进 `TmallChrome`。
+ *
+ * ACG 沿用 Jordan 的「精选」：那张 ACG 母版除店名与头像外整页都是从 Jordan 复制的
+ * （见 `data/storeIdentity.ts` 的同款标注），设计未给 ACG 单独的前缀词。
+ */
+export const SEARCH_PREFIX: Record<StoreId, string> = {
+  nike: '推荐',
+  acg: '精选',
+  jordan: '精选',
+  kids: '试试',
+};
+
 export const SEARCH_KEYWORDS: Record<StoreId, readonly string[]> = {
   // Commercial（双 11）未单独提供词库，暂与主店共用 —— 「充2500得2580」本身即促销词。待确认。
   nike: ['飞马', '空军一号', '充2500得2580', '斜挎包'],

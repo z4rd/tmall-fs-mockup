@@ -11,17 +11,25 @@ const CELL_W = [118, 119, 118];
 const COL_X = [0, 122, 245];
 const ROW_Y = [0, 180, 360];
 
-/** 男款底部 5 张缩略图不是网格顺序（报告 §2.5）。 */
-const THUMBS: Record<Gender, number[]> = {
-  men: [7, 1, 3, 5, 6],
-  women: [0, 1, 3, 5, 6],
-};
+/**
+ * 展开态几何（363 栏内，原点 = 楼层左上角）。
+ *
+ * 实测自 Figma `Av3olXfkvEqBJOS9xK7YIi`，男 `2340:10037` / 女 `4003:20256`，
+ * 并用 `agent-runs/2026-09-22-lookbook/measure.py` 逐像素复核过导出的 375×612 PNG。
+ * 设计稿画板在标题上方多留了 16px 留白，且底板从 y54 起；折叠态 `2685:58986`
+ * 的九宫格从 y44 起 —— 这里统一取 44，让展开态与折叠态的标题间距一致（用户第 1 条），
+ * 同时保证被点格 FLIP 到大卡时首行不跳。画板 y54 → 楼层 y44，整体上移 10px。
+ */
+const PANEL = { left: 0, top: 44, width: 363, height: 433 };
+/** 视频槽位：画板 (6,54) 246×433（男 `2340:10047`，设计师标注「这个是 video」）。 */
+const HERO = { left: 0, top: 44, width: 246, height: 433 };
 
-const THUMB_X = [13, 83, 153, 223, 293];
-
-/** §2.5 展开态几何（363 栏内） */
-const CARD = { left: 22, top: 54, width: 347, height: 433 };
-const HERO = { left: 22, top: 54, width: 246, height: 433 };
+/**
+ * 展开态楼层总高 = 底部穿搭条下缘。
+ * 画板里底条是 (6,489) 363×103 → 楼层 y479，479 + 103 = 582。男女画板高度
+ * 612 / 627 只是画板下方留白，内容完全一致，因此两边同高。
+ */
+const EXPANDED_H = 582;
 
 type LookbookGridFloorProps = {
   gender: Gender;
@@ -55,9 +63,7 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
   const collapseTimer = useRef<number | null>(null);
 
   const expanded = expandedIndex !== null;
-  const expandedH = gender === 'men' ? 612 : 627;
   const videoSrc = gender === 'men' ? HOME_VIDEOS.lookbookMen : HOME_VIDEOS.lookbookWomen;
-  const thumbs = THUMBS[gender];
 
   useEffect(() => {
     const video = videoRef.current;
@@ -99,7 +105,7 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
   return (
     <section
       className={`lookbook${expanded || leaving ? ' lookbook--open' : ''}${leaving ? ' lookbook--leaving' : ''}`}
-      style={{ height: u(expanded || leaving ? expandedH : height) }}
+      style={{ height: u(expanded || leaving ? EXPANDED_H : height) }}
     >
       <SectionHeader title="夏日穿搭" />
 
@@ -107,10 +113,10 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
         <div
           className="lookbook-card"
           style={{
-            left: u(CARD.left),
-            top: u(CARD.top),
-            width: u(CARD.width),
-            height: u(CARD.height),
+            left: u(PANEL.left),
+            top: u(PANEL.top),
+            width: u(PANEL.width),
+            height: u(PANEL.height),
           }}
           aria-hidden="true"
         />
@@ -141,7 +147,7 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
           >
             {!active ? (
               <img
-                src={publicAsset(`images/live/lookbook/${gender}/${index}.png`)}
+                src={publicAsset(`images/live/lookbook/${gender}/${index}.webp`)}
                 alt=""
                 draggable={false}
               />
@@ -183,39 +189,40 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
             onClick={collapse}
           >
             <span className="lookbook-back__icon" aria-hidden="true" />
-            返回
+            <span className="lookbook-back__label">返回</span>
           </button>
           <div className={`lookbook-rail${leaving ? ' lookbook-rail--out' : ''}`}>
             {[0, 1, 2].map((card) => (
               <img
                 key={card}
                 className="lookbook-rail__card"
-                src={publicAsset(`images/live/lookbook/${gender}/rail-${card}.png`)}
+                src={publicAsset(`images/live/lookbook/${gender}/rail-${card}.webp`)}
                 alt=""
               />
             ))}
           </div>
           <div className={`lookbook-thumbs${leaving ? ' lookbook-thumbs--out' : ''}`}>
-            {thumbs.map((cell, thumbIndex) => {
-              const selected = cell === expandedIndex;
-              return (
+            {/* 设计稿只摆得下 5 张（57 宽 + 13 间距，363 的条内放不下 9 张），
+                这里改成横滑，内容换成折叠态九宫格的同一批 9 张。 */}
+            <div className="lookbook-thumbs__track">
+              {Array.from({ length: 9 }, (_, cell) => (
                 <button
                   key={cell}
                   type="button"
-                  className={`lookbook-thumb${selected ? ' is-active' : ''}`}
-                  style={{ left: u(THUMB_X[thumbIndex] ?? 13) }}
+                  className="lookbook-thumb"
                   onClick={() => !leaving && openCell(cell)}
-                  aria-label={`穿搭 ${thumbIndex + 1}`}
+                  aria-label={`穿搭 ${cell + 1}`}
+                  aria-current={cell === expandedIndex}
                 >
                   <img
-                    src={publicAsset(`images/live/lookbook/${gender}/${cell}.png`)}
+                    src={publicAsset(`images/live/lookbook/${gender}/${cell}.webp`)}
                     alt=""
                     draggable={false}
                   />
-                  {selected ? <span className="lookbook-thumb__bar" /> : null}
                 </button>
-              );
-            })}
+              ))}
+            </div>
+            <span className="lookbook-thumbs__bar" aria-hidden="true" />
           </div>
         </>
       ) : null}

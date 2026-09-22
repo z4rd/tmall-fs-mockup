@@ -32,6 +32,10 @@ export const PILL_ICON_INSET = 20.5;
 
 /** 固定元素，两态完全一致。 */
 export const BACK_X = 16;
+/** 首页 `.cs-back` 锚点 y；宝贝页搜索框更高，`.gcs-back` 用 {@link GCS_BACK_Y}。 */
+export const CS_BACK_Y = 68;
+/** 宝贝页 `GoodsChrome` 返回箭头锚点 y（@1x，对齐分类顶栏母版）。 */
+export const GCS_BACK_Y = 65;
 export const BACK_W = 15;
 export const DOTS_X = 339;
 export const DOTS_W = 19;

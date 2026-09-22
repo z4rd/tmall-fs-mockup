@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "files": {
+    "landing/acg.png": {
+      "kind": "landing",
+      "height": 2940,
+      "width": 1125
+    },
+    "sheets/acg--highlight.png": {
+      "kind": "sheet",
+      "height": 2958,
+      "width": 1125
+    },
+    "sheets/acg--shoes.png": {
+      "kind": "sheet",
+      "height": 4746,
+      "width": 1125
+    },
+    "sheets/acg--scenes.png": {
+      "kind": "sheet",
+      "height": 3480,
+      "width": 1125
+    },
+    "landing/kids.png": {
+      "kind": "landing",
+      "height": 3036,
+      "width": 1125
+    },
+    "sheets/kids--big--weekly.png": {
+      "kind": "sheet",
+      "height": 2970,
+      "width": 1125
+    },
+    "sheets/kids--big--boys-shoes.png": {
+      "kind": "sheet",
+      "height": 2556,
+      "width": 1125
+    },
+    "sheets/kids--big--boys-apparel.png": {
+      "kind": "sheet",
+      "height": 2802,
+      "width": 1125
+    },
+    "sheets/kids--big--running.png": {
+      "kind": "sheet",
+      "height": 3063,
+      "width": 1125
+    },
+    "sheets/kids--big--other.png": {
+      "kind": "sheet",
+      "height": 2115,
+      "width": 1125
+    },
+    "sheets/kids--little--weekly.png": {
+      "kind": "sheet",
+      "height": 2526,
+      "width": 1125
+    },
+    "sheets/kids--baby--weekly.png": {
+      "kind": "sheet",
+      "height": 2526,
+      "width": 1125
+    },
+    "landing/jordan.png": {
+      "kind": "landing",
+      "height": 2931,
+      "width": 1125
+    },
+    "sheets/jordan--featured.png": {
+      "kind": "sheet",
+      "height": 2466,
+      "width": 1125
+    },
+    "sheets/jordan--men.png": {
+      "kind": "sheet",
+      "height": 2691,
+      "width": 1125
+    },
+    "sheets/jordan--classic.png": {
+      "kind": "sheet",
+      "height": 2481,
+      "width": 1125
+    },
+    "sheets/jordan--basketball.png": {
+      "kind": "sheet",
+      "height": 2808,
+      "width": 1125
+    }
+  }
+}

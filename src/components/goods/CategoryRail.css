@@ -9,18 +9,32 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 83px;
-  /* 最长的「网球高尔夫」在设计稿里仍是 14px、左右各留 7px，内边距不能再吃掉宽度。 */
-  padding: 0 2px;
+  /*
+   * 左对齐。文字左边缘 = 条目**外边缘 + 12**（四字及更短），五字及更长走 7，见 `is-long`。
+   *
+   * 四店设计稿的左导航共用同一个组件（`Frame 2147215445`：主店 `4012:13771`、
+   * Jordan `4018:21629`、ACG `4018:19247`、Kids `4021:24047`），文案一律左对齐、
+   * 与选中态无关 —— 设计侧从来不是居中。
+   *
+   * 这里写 11 而不是 12：设计稿的 12 是从条目外边缘量的，而本组件为了让选中/未选中
+   * 两态几何完全一致，border 常驻（只换颜色），`border-box` 下这 1px 已经占掉一格。
+   */
+  padding: 0 0 0 11px;
   border: 1px solid rgba(202, 202, 203, 0.8);
   border-radius: 4px;
   background: #fff;
   color: var(--text-primary);
   font-family: var(--font-cn);
+  font-size: 14px;
   font-weight: 500;
-  line-height: 1.15;
-  text-align: center;
+  /*
+   * 设计稿 leading 1.5（14 → 行盒 21）。21 的行盒在 48 高条目里居中落在 13.5，
+   * 设计稿标的 13 是 Figma 对文本框的整数取整，不是另一个值。
+   */
+  line-height: 1.5;
+  text-align: left;
   cursor: pointer;
   transition:
     background-color 0.22s ease,
@@ -29,14 +43,34 @@
     transform 0.12s ease;
 }
 
+/*
+ * 宽度随字数（`max-content`），**不要**再写 `width: 100%` —— 那会让 `text-align`
+ * 重新接管水平位置，左对齐就又变成「在 81px 里排版」，短条目被推回中间。
+ *
+ * 也不再挂 `overflow: hidden` / `text-overflow: ellipsis`：设计稿这一列是 `nowrap`、
+ * 没有省略号，而 `max-content` 的行盒本身不构成裁切盒，省略号在这里只会是个
+ * 随时可能误伤最长条目的裁切开关。
+ */
 .category-rail__label {
   display: block;
-  width: 100%;
-  font-size: 14px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
+}
+
+/*
+ * 五个及以上全角字的条目左边距收到 7（写 6 = 7 − 常驻 border）。
+ *
+ * 设计稿里 43 个条目有 38 个是 12，五个例外是 7：主店「网球高尔夫」「户外」、
+ * ACG「按场景选购」「按功能选购」、Kids 大童「其他运动」。其中三个五字条目左移是为了
+ * 腾出横向空间，「户外」（28 宽）和「其他运动」（56 宽）在 12 上绰绰有余、判定为设计手误，
+ * 所以这里按**全角字数**分档而不是按条目名单硬编码 —— 以后新增五字类目自动吃到同一档。
+ * 含拉丁字母的条目（轨底的「Jordan」）不入档，它字符数够但实宽不够，设计稿给的也是 12。
+ *
+ * 顺带解决了右侧余量：净宽从 70 变成 83 − 1 − 1 − 6 = 75，而五字在 PingFang SC 下实排
+ * 71.4（全角步进 14.29，不是设计稿 Noto Sans SC 的 14），右侧留出约 3.6。不再需要用负
+ * 字距去硬挤，排版回到设计的零字距。
+ */
+.category-rail__item.is-long {
+  padding-left: 6px;
 }
 
 .category-rail__item.is-active {

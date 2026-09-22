@@ -9,9 +9,24 @@
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta name="format-detection" content="telephone=no, email=no, address=no" />
     <meta name="theme-color" content="#f8f9fb" />
+    <!--
+      「添加到主屏幕」后以 standalone / fullscreen 启动，这是隐藏地址栏的唯一途径：
+      普通浏览器标签页里 iOS Safari 与 Android Chrome 都不允许隐藏地址栏。
+    -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!--
+      刻意**不用** black-translucent。本原型自己画了一条 iOS 状态栏
+      （`components/chrome/StatusBar.tsx`，时间 / 5G / 电量），black-translucent 会让
+      系统状态栏铺到页面之上，跟这条假状态栏叠在一起；而 default 让系统留出一条不透明
+      状态栏、页面从它下面开始，`env(safe-area-inset-top)` 随之为 0，
+      `ScaleViewport.css` 里既有的安全区内边距也就不会顶开顶部 chrome 的位图对齐。
+    -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Tmall Mockup" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <!-- 路径写成绝对形式，Vite 会按 base: './' 改写成相对路径，子路径部署才不会 404。 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Demo</title>
     <script>

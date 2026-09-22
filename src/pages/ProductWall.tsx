@@ -1,7 +1,14 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePageBack } from '../hooks/usePageBack';
-import { parseStoreKey, PRODUCT_WALL_SLICE, type StoreKey } from '../data/productWall';
+import { publicAsset } from '../lib/publicAsset';
+import { u } from '../lib/u';
+import {
+  parseStoreKey,
+  PRODUCT_WALL_BACK_CHROME,
+  PRODUCT_WALL_SLICE,
+  type StoreKey,
+} from '../data/productWall';
 import './ProductWall.css';
 
 /**
@@ -11,8 +18,14 @@ import './ProductWall.css';
 export function ProductWall() {
   const { goBack } = usePageBack();
   const { store: storeParam } = useParams();
+  const pw = PRODUCT_WALL_BACK_CHROME;
+  // 热区以位图 ← 的墨心为中心；夹到 ≥ 0 以免溢出屏幕左沿浪费可点面积。
+  const backLeft = Math.max(0, pw.anchorX - pw.w / 2);
+  const backTop = Math.max(0, pw.anchorY - pw.h / 2);
   const store: StoreKey = parseStoreKey(storeParam);
-  const src = PRODUCT_WALL_SLICE[store];
+  // 必须过 publicAsset：PRODUCT_WALL_SLICE 里是以 / 开头的绝对路径，
+  // 直接喂给 <img> 在 GitHub Pages 子路径（/<repo>/）下会打到站点根而 404。
+  const src = publicAsset(PRODUCT_WALL_SLICE[store]);
 
   const title =
     store === 'nike'
@@ -33,7 +46,18 @@ export function ProductWall() {
 
   return (
     <div className="pw">
-      <button type="button" className="pw-back" aria-label="返回" onClick={goBack} />
+      <button
+        type="button"
+        className="pw-back"
+        aria-label="返回"
+        onClick={goBack}
+        style={{
+          top: u(backTop),
+          left: u(backLeft),
+          width: u(pw.w),
+          height: u(pw.h),
+        }}
+      />
       <picture className="pw-picture">
         <img
           className="pw-img"

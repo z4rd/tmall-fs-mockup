@@ -12,13 +12,17 @@
   padding-bottom: 40px;
 }
 
-.store-home__hero {
-  overflow: hidden;
-  border-radius: var(--radius-l2);
+/*
+ * Jordan `closing` 已贴到画板底；末层下再留 40px 会在活底栏上方多出一道灰带。
+ * 活底栏 70px 仍由 `RouteShell` 全局占位承担。
+ */
+.store-home--jordan .store-home__main {
+  padding-bottom: 0;
 }
 
-.store-home__hero .hero-vid {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* `4022:8445`：橙底整块直角，视频是里面 347 × 434 的一格，不是整层出血 */
+.store-home__hero {
+  position: relative;
+  overflow: hidden;
+  background: #ff7334;
 }

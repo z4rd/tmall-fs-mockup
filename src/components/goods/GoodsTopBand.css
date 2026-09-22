@@ -1,0 +1,14 @@
+/*
+ * 顶部 223 原生区：白底 + 下沉 100 的店铺信息卡。
+ *
+ * 高度与 `padding-top` 由组件内联下发（都要走 `u()`，裸 px 会在缩放舞台里错位）。
+ * `.goods-page__chrome` 整块是 `pointer-events: none`（它原来只裹一张切图），
+ * 卡片里的「已关注」是真按钮，所以这一层要把事件收回来。
+ */
+.goods-topband {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  background: #fff;
+  pointer-events: auto;
+}

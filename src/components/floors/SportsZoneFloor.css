@@ -18,26 +18,53 @@
 }
 
 .sports-zone__viewport {
+  position: relative;
   height: 100%;
   overflow: hidden;
   border-radius: inherit;
   touch-action: pan-y;
 }
 
-.sports-zone__track {
-  display: flex;
-  height: 100%;
-  width: 100%;
-  transition: transform 300ms linear;
-  will-change: transform;
-}
-
+/*
+ * 主题切换 = 七页叠放 + 交叉淡入淡出（原来是整条轨道 translateX 横移 300ms linear，
+ * 用户明确要求改掉左右切换）。
+ *
+ * ── 为什么淡出页不做动画 ────────────────────────────────────────────
+ * 常规写法是淡入页 0→1、淡出页 1→0 同时跑，但两条曲线在中点的不透明度之和小于 1，
+ * 中间会透出卡片底色 #111，也就是穿帮（深色底上表现为整块「压暗」一下）。
+ * 这里改成：**淡入页在上层做 0→1，淡出页整段时长保持不透明、结束瞬间才归零**。
+ * 于是任意时刻画面都被至少一张不透明的面板铺满，合成结果正好是一次干净的交叉淡化，
+ * 底色一帧都不会露出来。「结束瞬间才归零」就是下面 `transition: opacity 0s 240ms`
+ * 的含义 —— 时长 0、延迟等于淡入时长，所以它先保持 1 再跳到 0，跳变发生在
+ * 淡入页已经完全不透明之后，看不见。
+ *
+ * 240ms / cubic-bezier(0.4, 0, 0.2, 1)：
+ *   - 比胶囊的 300ms linear 短，面板内容先落定、手指底下的胶囊最后落定，切换显得利落；
+ *   - 纯不透明度变化没有空间位移要收，整块满幅面板超过 300ms 就开始显拖沓；
+ *   - 用标准减速曲线（快起慢收）让新面板尽早成形，收尾再柔和过渡。
+ */
 .sports-zone__page {
-  position: relative;
-  flex: 0 0 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   background: #111;
+  opacity: 0;
+  transition: opacity 0s 240ms;
+  pointer-events: none;
+}
+
+.sports-zone__page.is-shown {
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sports-zone__page,
+  .sports-zone__page.is-shown {
+    transition: none;
+  }
 }
 
 .sports-zone__shot {

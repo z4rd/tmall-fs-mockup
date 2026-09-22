@@ -4,17 +4,30 @@
   background: var(--surface-page);
 }
 
-/* 与 `TmallChrome` `.cs-back` / 天猫原生顶栏 ← 同位（`chromeGeometry` BACK_X + searchrow y68） */
+/*
+ * 透明热区与位图 ← 同层滚动，不叠矢量、不走舞台层 `PageBackChrome`（防重影）。
+ *
+ * 这是个空 button（没有 children，也不渲染 svg），内容盒天生是 0×0，
+ * 所以尺寸必须显式给 —— top/left/width/height 由 `ProductWall.tsx` 从
+ * `PRODUCT_WALL_BACK_CHROME` 内联下来（走 `u()` 缩放）。此处勿再写 width/height。
+ */
 .pw-back {
   position: absolute;
-  z-index: 3;
-  top: 68px;
-  left: 16px;
-  width: 44px;
-  height: 44px;
-  margin: -14px;
-  padding: 14px;
-  /* 透明热区：位图已含原生 ←，勿再叠 `PageBackChrome` 矢量 */
+  z-index: 2;
+  display: block;
+  line-height: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity var(--press-dur) ease-out;
+}
+
+/* 轻反馈：热区是正方形，压下时给一枚同尺寸圆形浅灰底；8% 黑不至于糊住位图里的 ←。 */
+.pw-back:active {
+  opacity: var(--press-opacity);
+  border-radius: 50%;
+  background: rgb(0 0 0 / 8%);
 }
 
 .pw-picture {

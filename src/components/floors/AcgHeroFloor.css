@@ -1,0 +1,152 @@
+/**
+ * ACG 首页 hero 叠层，几何全部量自 `4022:8445`（363 × 530）。
+ * 本文件所有 px 由 PostCSS 改写成 calc(N * var(--u))，照设计 px 直接写即可。
+ */
+
+/* 字标 `4022:8471`：56.054 × 48 @ (153.5, 20)，左边距即 (363 - 56.054) / 2 */
+.acg-hero__wordmark {
+  position: absolute;
+  left: 153.5px;
+  top: 20px;
+  width: 56.054px;
+  height: 48px;
+  object-fit: cover;
+}
+
+/* `4022:8447` Mobile Hero Carousel：347 × 434 @ (8, 88)，直角无圆角 */
+.acg-hero__stage {
+  position: absolute;
+  left: 8px;
+  top: 88px;
+  width: 347px;
+  height: 434px;
+  overflow: hidden;
+}
+
+.acg-hero__stage .hero-vid {
+  height: 100%;
+}
+
+.acg-hero__scrim {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* `4022:8455` Graphic：363 × 503.667，绕中心 0.2deg，整框压一层 */
+.acg-hero__scrim--full {
+  left: calc(50% + 0.11px);
+  top: calc(50% - 5.53px);
+  width: 363px;
+  height: 503.667px;
+  transform: translate(-50%, -50%) rotate(0.2deg);
+  background: linear-gradient(180deg, rgb(0 0 0 / 0%) 46.21%, rgb(0 0 0 / 50%) 79.677%);
+}
+
+/* `4022:8457`：底部再压一层，整体 70% 不透明度 */
+.acg-hero__scrim--foot {
+  left: 0;
+  top: 228px;
+  width: 351px;
+  height: 246px;
+  opacity: 0.7;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0%) 0%, #000 100%);
+}
+
+/* `4022:8458`：贴底 164 高的文案块，以下子元素的坐标都以它为原点 */
+.acg-hero__copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 164px;
+  /* CTA 与指示器都无跳转目标，整块不吃指针 */
+  pointer-events: none;
+}
+
+/* `4022:8459`：24px Bold，字距 -0.72，行高 1（Figma leading-none） */
+.acg-hero__headline {
+  position: absolute;
+  left: 16px;
+  top: 70px;
+  margin: 0;
+  font-family: var(--font-cn);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.72px;
+  color: var(--text-on-dark);
+  white-space: nowrap;
+}
+
+/* `4022:8460`：两枚按钮各自带一点点旋转，所以行高取两者外接盒的较大值 */
+.acg-hero__cta {
+  position: absolute;
+  left: 16px;
+  top: 114px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  height: 33.252px;
+}
+
+/*
+ * `4022:8461` / `4022:8464`：Figma 里宽被钉死在 72，文案（4 个汉字 = 48）比
+ * 内边距留出的位置宽，实际是溢出后居中，所以这里直接用定宽 + 居中，不写 padding。
+ */
+.acg-hero__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  border-radius: 8px;
+  background: #ff7334;
+  font-family: var(--font-cn);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.acg-hero__btn--explore {
+  height: 30px;
+  transform: rotate(0.85deg);
+}
+
+.acg-hero__btn--watch {
+  height: 32px;
+  gap: 4px;
+  transform: rotate(-1deg);
+}
+
+.acg-hero__play {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* `4022:8467` Pagination - On Card：40 × 12 @ (295, 136) */
+.acg-hero__dots {
+  position: absolute;
+  left: 295px;
+  top: 136px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: rgb(17 17 17 / 30%);
+}
+
+.acg-hero__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 12%);
+}
+
+.acg-hero__dot.is-active {
+  width: 16px;
+  border-radius: 6px;
+  background: var(--color-white);
+}

@@ -13,13 +13,13 @@
 | Men 楼层 Tier C | 363 × 各层高 | **1089 × …** |
 | Women 楼层 Tier C | 同 Men 363 宽 | **1089 × …**（与 Men 同 @3 规则） |
 
-路径：
+路径（运行时一律 `.webp`，@3 PNG 母版只留在 `assets-src/`）：
 
-- `public/images/entry/<key>.png`
-- `public/images/product-wall/<store>.png`
-- `public/images/floors/<men|women>/<floorKey>.png`
+- `public/images/entry/<key>.webp`
+- `public/images/product-wall/<store>.webp`
+- `public/images/floors/<men|women>/<floorKey>.webp`
 
-母版备份：`assets-src/` 同路径镜像。
+母版备份：`assets-src/` 同路径镜像，保留 `.png`（含 `@2x` 中间产物）。
 
 节点：索引 `entryFigmaNodes.ts`；产品墙 `PRODUCT_WALL_FIGMA_NODE`；楼层 `floorFigmaNodes.ts`。
 
@@ -39,4 +39,6 @@
 
 索引卡描边/阴影在 PNG 内，页面无 CSS `border` / `box-shadow`。
 
-产品墙返回热区：`PRODUCT_WALL_BACK_HIT` · `ProductWall.css` `.pw-back`。
+产品墙返回：位图里已烤死天猫原生 ←，页面只铺透明热区 `.pw-back`（勿叠活矢量、勿再用舞台层
+`PageBackChrome`，两者都会重影）。几何走 `PRODUCT_WALL_BACK_CHROME`：墨心 (18.7, 78.2) @1x、
+热区 48×48。四张图的 ← 位置实测完全一致，无需逐店偏移。

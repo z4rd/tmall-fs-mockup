@@ -101,11 +101,34 @@
   inset: 0;
 }
 
+/*
+ * 44×44 热区：负 margin 抵掉 padding，盒子撑大而图标一像素不动（与 `.page-back-chrome`
+ * `.pw-back` 同一套模式）。
+ *
+ * 那两处是 `width/height:44 + flex 居中`，这里刻意不照抄：15×14 的 svg 居中到 16×16 的
+ * 内容盒里会落在 (16.5, 69)，比位图母版的 (16, 68) 偏半像素。改成让 padding 自己凑够
+ * 44（15+14.5×2 / 14+15×2），svg 就从内容盒原点起排；margin 见 `calc(-14u / -14.5u)`。
+ *
+ * z-index 是为了把热区右缘那 3.5px 从 `.cs-pill` 手里要回来 —— 搜索胶囊左缘在 42、热区
+ * 右缘在 45.5，胶囊 DOM 在后所以默认压在上面。胶囊本身是死区（无 onClick），让位不丢功能，
+ * 而按钮只画一个透明盒 + svg，抬层也不改变任何绘制结果。
+ */
 .cs-back {
   position: absolute;
+  z-index: 1;
   top: 68px;
   left: 16px;
+  display: block;
+  line-height: 0;
+  /* no-scale */
+  margin: calc(-14 * var(--u)) calc(-14.5 * var(--u));
+  padding: 15px 14.5px;
   color: inherit;
+  transition: opacity var(--press-dur) ease-out;
+}
+
+.cs-back:active {
+  opacity: var(--press-opacity);
 }
 
 .cs-back svg {

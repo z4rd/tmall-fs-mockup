@@ -1,34 +1,69 @@
+/*
+ * 宝贝页底色是**白**，不是首页的 `--surface-page`（#f8f9fb）。
+ *
+ * 依据：四张分类稿都在 223 之下压了一张整幅白矩形（主店 `4012:13620`、Jordan
+ * `4018:21624`、Kids `4021:23601` / `4021:23602`），左导轨容器本身也是 `bg-white`。
+ * 只改这一页，全局 `--surface-page` 仍是首页楼层的设计语言，不要动。
+ */
+/*
+ * 底部**不留** padding：活导航的 70px 由 `RouteShell` 末尾那个全局占位 div 统一预留，
+ * 这里再留一次就是双重预留，页尾会多出正好 70 的白。
+ */
 .goods-page {
   position: relative;
   min-height: 100%;
-  padding-bottom: 70px;
-  background: var(--surface-page);
+  background: #fff;
 }
 
 /* ---------- browse：整屏瀑布流位图 ---------- */
 
-.goods-page--browse {
-  padding-bottom: 0;
-}
-
+/*
+ * 高度由 `GoodsBrowseView` 下发（= 裁后 landing @1x 高）。
+ * `overflow: hidden` 防止位图仍带页尾导航时把可滚区域撑出第二条底栏（clip-path 不改布局盒）。
+ */
 .goods-page__landing-shell {
   position: relative;
   z-index: 1;
-  margin-top: calc(-223 * var(--u));
+  overflow: hidden;
   pointer-events: none;
 }
 
-/* browse：共用 223 顶栏 + 真实 BottomNav，位图裁掉重复的顶/底原生区（各 223 / 70 @1x） */
+/*
+ * browse：活顶栏 + 真实 BottomNav；位图顶 223 用 clip-path 盖住。
+ *
+ * 必须用 `height: auto` 按切图固有比例撑开布局。`height: 100%` + `object-fit: cover`
+ * 在部分 WebKit 上会在 decode 前算出 0 高，整页瀑布区呈空白（2026-09-22 Jordan 反馈）。
+ *
+ * 页尾 `--goods-landing-tail` 与分类态的 `--goods-sheet-tail` 是同一套机制：
+ * clip-path 只遮不改布局盒，所以必须再配等量的负 margin-bottom 才不会多占高度。
+ * 取值见 `goodsLandingDesigns` 的 `bottomClipPx`（只有 Kids 非 0）。
+ */
 .goods-page__landing {
   display: block;
   position: relative;
   z-index: 0;
   width: 100%;
   height: auto;
-  clip-path: inset(calc(223 * var(--u)) 0 calc(70 * var(--u)) 0);
-  margin-bottom: calc(-70 * var(--u));
+  vertical-align: top;
+  clip-path: inset(calc(223 * var(--u)) 0 var(--goods-landing-tail, 0px) 0);
+  margin-top: calc(-223 * var(--u));
+  margin-bottom: calc(-1 * var(--goods-landing-tail, 0px));
   pointer-events: none;
   user-select: none;
+}
+
+/*
+ * 盖住 browse 根稿位图自带的那条位图 tab 行，再把活组件画在上面。
+ *
+ * 绝对定位、不占流：`--goods-*` 的 top / height 由 `GoodsBrowseView` 按逐店实测下发，
+ * 位图整页的纵向对位因此完全不受影响。
+ */
+.goods-page__index-cover {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  width: 100%;
+  background: #fff;
 }
 
 .goods-page__chrome {
@@ -38,40 +73,7 @@
   pointer-events: none;
 }
 
-.goods-page__native-tabs {
-  position: absolute;
-  z-index: 6;
-  left: 0;
-  top: 0;
-  width: 100%;
-  pointer-events: none;
-}
-
-.goods-page__native-tabs--landing {
-  height: 100%;
-}
-
-/*
- * 容器一律贴页面顶（= 原生顶栏切图的 y0，也就是 landing 位图的 y0），逐店热区坐标
- * 全部由 `goodsLandingDesigns` 内联下发。此前 category 态在容器上又叠了一层 226 偏移，
- * 与内联 top 叠加后热区掉到了页面 y452，等于失效。
- */
-.goods-page--category .goods-page__native-tabs {
-  height: 0;
-}
-
-.goods-page__native-tab-hit {
-  position: absolute;
-  z-index: 11;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-/* ---------- category：店铺卡 + Header2 + 左导航 + 全宽切图叠层 ---------- */
+/* ---------- category：白头 + Header2 + 左导航 + 全宽切图叠层 ---------- */
 
 .goods-page__top {
   display: block;
@@ -83,20 +85,40 @@
   user-select: none;
 }
 
+/*
+ * `Header 2` = 一级 tab 行 + 可选的族 tab 条。
+ *
+ * 高度写死成 `railTop − indexTabRowTop` 并按 `223 − indexTabRowTop` 上提，左导轨因此
+ * 必然落在设计稿的 `railTop`（主店 325 / ACG·Jordan 276 / Kids 296），不再依赖族 tab
+ * 条的实际高度。Kids 的上提量是 42，正好把 223 顶栏切图里那条位图 tab 行白底盖掉。
+ */
 .goods-page__header2 {
   position: sticky;
   top: 0;
   z-index: 6;
+  box-sizing: border-box;
   width: 100%;
+  height: var(--goods-header2-height, auto);
+  margin-top: calc(-1 * var(--goods-header2-lift, 0px));
+  background: #fff;
 }
 
-/* `--goods-catalog-offset` 已经是 u() 产出的长度，不能再乘一次 --u（那样整条声明会失效）。 */
 .goods-page__catalog {
   display: flex;
   align-items: flex-start;
-  margin-top: var(--goods-catalog-offset, 0);
   padding-left: calc(13 * var(--u));
   min-height: calc(320 * var(--u));
+}
+
+/*
+ * 右侧 sheet 裁掉底栏死区后，末行与活底栏之间留 48 @1x 白底。
+ * `RouteShell` 的 70px 占位只防内容被挡，不替代这段版式呼吸区。
+ *
+ * 由 `goodsSheetBottomClipPx() > 0` 挂类，Jordan / ACG / Kids 共用一条规则；
+ * 裁切量为 0 的店（主店）不挂，免得白白多 48。
+ */
+.goods-page--clipped-category .goods-page__catalog {
+  padding-bottom: calc(48 * var(--u));
 }
 
 /* 设计稿 `4012:13768` 里只有 Header 2 是 sticky，左导轨是普通块、随页面滚动。 */
@@ -108,6 +130,11 @@
   pointer-events: auto;
 }
 
+/*
+ * 右侧 sheet 列 `overflow: hidden`。主店页尾已由 `install_goods_png.py` 裁掉；
+ * Jordan / ACG / Kids 的逐 sheet 底栏死区见 `goods.ts` 的三张 `*_SHEET_BOTTOM_CLIP_PX`
+ * + `--goods-sheet-tail`。
+ */
 .goods-page__sheet-layer {
   position: relative;
   z-index: 1;
@@ -121,16 +148,17 @@
 
 /*
  * 切图是整页的（顶 223 原生区已由构建脚本裁掉），所以它自己还带着 Header 2、左导轨和
- * 贴底 Bottom Nav —— 这些都由活组件负责，得靠负边距顶出 `overflow: hidden` 的窗口。
- * 少了 margin-top 时，被遮的 102px 仍占位，右侧栏整体下沉 102px，顶上就空一大块。
+ * 贴底 Bottom Nav 已从 PNG 裁掉，活组件 `BottomNav` 单独渲染。
+ * 少了 margin-top 时，被遮的 Header 2 仍占位，右侧栏整体下沉，顶上就空一大块。
  */
 .goods-page__sheet {
   display: block;
   width: calc(375 * var(--u));
   max-width: none;
   margin-top: calc(-1 * var(--goods-sheet-head, 0px));
-  margin-bottom: calc(-70 * var(--u));
   margin-left: calc(-117 * var(--u));
+  clip-path: inset(0 0 var(--goods-sheet-tail, 0px) 0);
+  margin-bottom: calc(-1 * var(--goods-sheet-tail, 0px));
   opacity: 0;
   pointer-events: none;
 }
