@@ -1,0 +1,184 @@
+.goods-page {
+  position: relative;
+  min-height: 100%;
+  padding-bottom: 70px;
+  background: var(--surface-page);
+}
+
+/* ---------- browse：整屏瀑布流位图 ---------- */
+
+.goods-page--browse {
+  padding-bottom: 0;
+}
+
+.goods-page__landing-shell {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(-223 * var(--u));
+  pointer-events: none;
+}
+
+/* browse：共用 223 顶栏 + 真实 BottomNav，位图裁掉重复的顶/底原生区（各 223 / 70 @1x） */
+.goods-page__landing {
+  display: block;
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: auto;
+  clip-path: inset(calc(223 * var(--u)) 0 calc(70 * var(--u)) 0);
+  margin-bottom: calc(-70 * var(--u));
+  pointer-events: none;
+  user-select: none;
+}
+
+.goods-page__chrome {
+  position: relative;
+  z-index: 5;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.goods-page__native-tabs {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  top: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.goods-page__native-tabs--landing {
+  height: 100%;
+}
+
+/*
+ * 容器一律贴页面顶（= 原生顶栏切图的 y0，也就是 landing 位图的 y0），逐店热区坐标
+ * 全部由 `goodsLandingDesigns` 内联下发。此前 category 态在容器上又叠了一层 226 偏移，
+ * 与内联 top 叠加后热区掉到了页面 y452，等于失效。
+ */
+.goods-page--category .goods-page__native-tabs {
+  height: 0;
+}
+
+.goods-page__native-tab-hit {
+  position: absolute;
+  z-index: 11;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* ---------- category：店铺卡 + Header2 + 左导航 + 全宽切图叠层 ---------- */
+
+.goods-page__top {
+  display: block;
+  width: 100%;
+  height: 223px;
+  object-fit: cover;
+  object-position: top center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.goods-page__header2 {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  width: 100%;
+}
+
+/* `--goods-catalog-offset` 已经是 u() 产出的长度，不能再乘一次 --u（那样整条声明会失效）。 */
+.goods-page__catalog {
+  display: flex;
+  align-items: flex-start;
+  margin-top: var(--goods-catalog-offset, 0);
+  padding-left: calc(13 * var(--u));
+  min-height: calc(320 * var(--u));
+}
+
+/* 设计稿 `4012:13768` 里只有 Header 2 是 sticky，左导轨是普通块、随页面滚动。 */
+.goods-page__rail-col {
+  position: relative;
+  z-index: 10;
+  flex: 0 0 calc(83 * var(--u));
+  align-self: flex-start;
+  pointer-events: auto;
+}
+
+.goods-page__sheet-layer {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 calc(242 * var(--u));
+  width: calc(242 * var(--u));
+  margin-left: calc(21 * var(--u));
+  min-height: calc(280 * var(--u));
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/*
+ * 切图是整页的（顶 223 原生区已由构建脚本裁掉），所以它自己还带着 Header 2、左导轨和
+ * 贴底 Bottom Nav —— 这些都由活组件负责，得靠负边距顶出 `overflow: hidden` 的窗口。
+ * 少了 margin-top 时，被遮的 102px 仍占位，右侧栏整体下沉 102px，顶上就空一大块。
+ */
+.goods-page__sheet {
+  display: block;
+  width: calc(375 * var(--u));
+  max-width: none;
+  margin-top: calc(-1 * var(--goods-sheet-head, 0px));
+  margin-bottom: calc(-70 * var(--u));
+  margin-left: calc(-117 * var(--u));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.goods-page__sheet.is-ready {
+  opacity: 1;
+}
+
+.goods-page__sheet-skeleton {
+  position: absolute;
+  inset: 0;
+  min-height: 320px;
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-100) 0%,
+    var(--color-gray-200) 50%,
+    var(--color-gray-100) 100%
+  );
+  background-size: 200% 100%;
+  animation: goods-sheet-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes goods-sheet-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.goods-page__sheet-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  color: var(--color-gray-500);
+  font-size: 12px;
+}
+
+.goods-page__panel-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}

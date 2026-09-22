@@ -1,0 +1,286 @@
+/**
+ * 下面每一个会动的长度都是基于 --collapse 与 --morph 的 calc()，这两个无量纲
+ * 属性由 useCollapsibleHeader 逐帧写入。不用 transition：§6.3 实测 header 是
+ * 滚动位置的纯函数，加过渡既会让它与手指脱节，也会破坏反向对称性。
+ *
+ * 这些 calc() 里的裸数字是设计 px 手工乘上 --u 的结果 —— PostCSS 的改写只对
+ * 字面量 `px` 生效。
+ */
+/* --collapse 与 --morph 由 useCollapsibleHeader 发布在 :root 上，所以这里刻意
+   不声明它们 —— 局部声明会遮蔽 :root 的值，把 header 钉死在展开态。
+   各处的 `, 0` 兜底值只用于首屏绘制那一帧。 */
+.cs {
+  position: absolute;
+  z-index: 40;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: calc((139 - 39 * var(--collapse, 0)) * var(--u));
+  overflow: hidden;
+  color: #fff;
+  /* chrome 高度与胶囊宽度逐帧变化，会触发布局；contain 把影响锁在 header 内，
+     不让它波及滚动内容。实测对中位帧时无影响，但能收敛长尾尖峰。 */
+  contain: layout paint style;
+}
+
+:root[data-chrome-dark='false'] .cs {
+  color: var(--color-black);
+}
+
+/* 沉浸式渐变，色相取样自 tmallref.mp4 的展开态帧。 */
+.cs-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 130% at 88% 12%, #9b6f6b 0%, rgb(155 111 107 / 0%) 58%),
+    radial-gradient(110% 120% at 6% 78%, #8d8487 0%, rgb(141 132 135 / 0%) 62%),
+    linear-gradient(168deg, #5d6062 0%, #63696c 52%, #6f7477 100%);
+}
+
+/* header 里唯一的硬切（§6.3）：渐变在 1 帧内变成纯白，所以这是状态翻转而不是
+   插值过渡。 */
+:root[data-chrome-dark='false'] .cs .cs-bg {
+  background: #fff;
+  box-shadow: inset 0 -0.5px 0 rgb(17 17 17 / 8%);
+}
+
+/* ---------- 状态栏 ---------- */
+
+/* 内容在 44px 高的状态栏里偏下：Figma 位图上数字落在 y24–36，所以这里用
+   padding 把内容压下去，而不是垂直居中。 */
+.cs-status {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 15px 20px 0 33px;
+}
+
+.cs-status-left,
+.cs-status-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cs-time {
+  font-size: 17px;
+  font-weight: 500;
+  font-family: var(--font-latin);
+  letter-spacing: 0.1px;
+}
+
+.cs-locate {
+  width: 11px;
+  height: 11px;
+  opacity: 0.9;
+}
+
+.cs-signal {
+  width: 17px;
+  height: 10.5px;
+}
+
+.cs-net {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-latin);
+}
+
+.cs-battery {
+  width: 26px;
+  height: 12.5px;
+}
+
+/* ---------- 搜索行 ---------- */
+
+/* 一个通栏图层，好让每个子元素都能按实测的页面偏移量绝对定位。 */
+.cs-searchrow {
+  position: absolute;
+  inset: 0;
+}
+
+.cs-back {
+  position: absolute;
+  top: 68px;
+  left: 16px;
+  color: inherit;
+}
+
+.cs-back svg {
+  display: block;
+  width: 15px;
+  height: 14px;
+}
+
+/*
+ * 正好落在胶囊左端原来的位置上，这样视觉上读起来是「胶囊收缩让出它」，而不是
+ * 两个元素互相穿插。
+ *
+ * 展开时向下移出 header 被 overflow 裁掉，而不是原地淡出 —— 这是从仲裁产物
+ * `v2_hdr_720_747.png` 的 morph 全过程顶栏逐帧读出来的：logo tile 与「已关注」
+ * 都是竖直下沉出框，`←` 在 logo tile 沉下去之后才出现。
+ */
+.cs-logo {
+  position: absolute;
+  top: 61px;
+  left: 42px;
+  opacity: calc((var(--morph, 0) - 0.45) / 0.55);
+  transform: translate3d(0, calc((1 - var(--morph, 0)) * 30 * var(--u)), 0);
+}
+
+.cs-logo .nike-tile {
+  display: block;
+}
+
+.cs-pill {
+  position: absolute;
+  top: 61px;
+  left: calc((42 + 54 * var(--morph, 0)) * var(--u));
+  display: flex;
+  align-items: center;
+  width: calc((289 - 115 * var(--morph, 0)) * var(--u));
+  height: 35px;
+  border-radius: 100px;
+  background: rgb(17 17 17 / 22%);
+  padding: 0 44px 0 16px;
+}
+
+:root[data-chrome-dark='false'] .cs .cs-pill {
+  background: #f0f3f4;
+}
+
+/*
+ * placeholder 容器。文案由 useRotatingKeyword 直接写 textContent，3s 一换。
+ *
+ * 可用宽度实测：展开态 229、**收起态 114**（后者是约束面）。现有词库最长的
+ * 「充2500得2580」排版宽 97，收起态仍余 17 —— 全部 13 个词都放得下。
+ * 换算下来收起态的上限约 9.5 个汉字，日后加词按这个数卡。
+ *
+ * nowrap + overflow:hidden 是兜底：万一将来有超长词，会被裁掉而不是换行撑破胶囊。
+ */
+.cs-keyword {
+  flex: 1;
+  overflow: hidden;
+  opacity: 0.72;
+  font-size: 14px;
+  font-family: var(--font-cn);
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+.cs-divider {
+  position: absolute;
+  top: 10px;
+  right: 38.5px;
+  width: 1px;
+  height: 15px;
+  background: currentColor;
+  opacity: 0.22;
+}
+
+.cs-search {
+  position: absolute;
+  top: 8.5px;
+  right: 11.5px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.85;
+}
+
+.cs-follow {
+  position: absolute;
+  top: 64px;
+  left: 275px;
+  width: 54px;
+  height: 29px;
+  border-radius: 100px;
+  background: rgb(255 255 255 / 26%);
+  color: inherit;
+  font-size: 12px;
+  font-family: var(--font-cn);
+  line-height: 29px;
+  text-align: center;
+  opacity: calc((var(--morph, 0) - 0.45) / 0.55);
+  /*
+   * 与 logo tile 同向：展开时竖直下沉出框，而不是横向滑出。
+   *
+   * §6.11 把这条记为「已关注在展开态下移进店铺信息卡」—— 结构上确实如此：
+   * 展开态它属于店铺卡（`.sc-follow`），收起态属于顶栏（本规则）。两者不是
+   * 同一个元素在飞，而是一个随卡片滚出视口、另一个从 header 下沿升上来，
+   * 合起来读作「换位置」。
+   */
+  transform: translate3d(0, calc((1 - var(--morph, 0)) * 30 * var(--u)), 0);
+}
+
+:root[data-chrome-dark='false'] .cs .cs-follow {
+  background: var(--color-gray-300);
+  color: #6f6f72;
+}
+
+.cs-dots {
+  position: absolute;
+  top: 76px;
+  left: 339px;
+  color: inherit;
+}
+
+.cs-dots svg {
+  display: block;
+  width: 19px;
+  height: 4px;
+}
+
+/* ---------- 下拉进入直播间提示 ---------- */
+
+.cs-prompt {
+  position: absolute;
+  top: 104px;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 实测 icon 右缘 137.13 → 文字左缘 141.17，间距 4.04 设计 px。 */
+  gap: 4px;
+  height: 18px;
+  opacity: calc(1 - var(--collapse, 0) * 1.6);
+  font-size: 12px;
+  font-family: var(--font-cn);
+  /*
+   * 校正字体差：原稿是 iOS 的 PingFang SC，本项目用 Noto Sans SC，同样 9 个字
+   * 排出来宽 110.27 而非原稿的 106.03。整行居中，这 4.24 的超出会把 icon 一并
+   * 往左带 2.1px。按 9 字摊掉差值即可，icon 与文字同时归位：
+   * icon 左缘 127.5（原稿 127.49）、文字左缘 141.5（原稿 141.17）。
+   */
+  letter-spacing: -0.471px;
+  transform: translate3d(0, calc(var(--collapse, 0) * -12 * var(--u)), 0);
+}
+
+/*
+ * 双 V 形：从 3.216x 原始截图切片，尺寸与两段透明度都按原稿还原
+ * （上 V α≈0.50、下 V α=1.0，两者部分交叠 —— 手绘件做不出这个层次）。
+ *
+ * 用 mask + currentColor 而不是 <img>：切片本身是纯白 + alpha，走 mask 既能
+ * 保住原稿的灰度层次，又让它继续跟随 `color` 翻色。
+ *
+ * 论证过它不需要深浅两套：提示行 opacity = 1 - collapse×1.6，在 collapse=0.625
+ * 即 scrollTop≈43.75 时就归零，而底色要到 BG_SWITCH=140 才翻白 —— 整个可见
+ * 生命周期都在深色渐变上，裕度 3 倍以上。即便 BG_SWITCH 取区间下限 120 也不受
+ * 影响。保留 currentColor 只是为了让这个结论日后被改动时不会静默失效。
+ */
+.cs-prompt-icon {
+  flex: none;
+  /* 切片即 icon 的精确包围盒（3.216x 下 32×30）。刻意不留透明边距：
+     边距会挤占 gap，导致 icon 与文字无法同时对位。当前 icon 左缘落在 127.49、
+     文字左缘 141.48，对原稿的 127.49 / 141.17 误差 0 与 0.31。 */
+  width: 9.95px;
+  height: 9.33px;
+  /* flex 居中把它放在 y113.0，原稿是 y113.65；纯视觉补正，不参与布局。 */
+  position: relative;
+  top: 0.8px;
+  background: currentColor;
+  -webkit-mask: url('../../assets/icons/prompt-chevrons.png') center / contain no-repeat;
+  mask: url('../../assets/icons/prompt-chevrons.png') center / contain no-repeat;
+}

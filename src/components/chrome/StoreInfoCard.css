@@ -1,0 +1,196 @@
+/**
+ * 随页面滚动，但在 morph 区间里淡出并略微滞后，把画面让给收起后的 chrome ——
+ * 即 §6.3 的视差交叉淡出。
+ */
+.sc {
+  position: relative;
+  /* 卡高逐店不同：Kids 稿没有天猫认证黑条，只有 88。默认值兜住变量缺失的情况。 */
+  height: var(--sc-h, 123px);
+  background: #fff;
+  opacity: calc(1 - var(--morph, 0) * 1.5);
+  transform: translate3d(0, calc(var(--morph, 0) * 20 * var(--u)), 0);
+}
+
+/* ---------- 店名行 ---------- */
+
+.sc-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 11px 0 15px;
+}
+
+.sc-meta {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sc-nameline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sc-name {
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-cn);
+  line-height: 1.2;
+  letter-spacing: -0.1px;
+}
+
+/* 天猫徽标、五角星、盾形标都是 3.216x 原始截图的切片，尺寸即切片的设计尺寸。 */
+.sc-tmall {
+  flex: none;
+  width: 28.3px;
+  height: 14.9px;
+}
+
+.sc-statline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 五颗星，步进 9.6，整组 x57.2–104.8；右侧的「4.9」是活文字，不在切片内。 */
+.sc-stars {
+  flex: none;
+  width: 48.2px;
+  height: 8.7px;
+}
+
+.sc-score {
+  color: var(--color-red);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-latin);
+}
+
+.sc-sep {
+  width: 1px;
+  height: 9px;
+  background: var(--color-gray-300);
+}
+
+.sc-fans {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-cn);
+}
+
+.sc-follow {
+  flex: none;
+  width: 55px;
+  height: 26px;
+  border-radius: 100px;
+  background: var(--color-gray-200);
+  color: #6f6f72;
+  font-size: 12px;
+  font-family: var(--font-cn);
+}
+
+/* ---------- 天猫认证条 ---------- */
+
+.sc-verified {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 9px 16px 0;
+  border-radius: 8px;
+  background: #1d2433;
+  padding: 0 12px;
+  height: 27px;
+  color: #fff;
+  font-size: 12px;
+  font-family: var(--font-cn);
+}
+
+/* 切片带 alpha，底色由下面的深色条透出来。 */
+.sc-shield {
+  flex: none;
+  width: 13.4px;
+  height: 11.8px;
+}
+
+/* ---------- 店铺数据走马灯 ---------- */
+
+.sc-marquee {
+  position: absolute;
+  right: 0;
+  bottom: 7px;
+  left: 13px;
+  overflow: hidden;
+  height: 25px;
+}
+
+/**
+ * 设计空间 −11.9 px/s（§6.6 实测 −12.4 px/s @390），线性、无限循环。
+ *
+ * 轨道内放两份 chip，正好平移 -50%，衔接无缝。时长由 JS 按实测轨道宽度设成
+ * 内联值 —— 百分比平移本身承载不了固定的 px/s 速率。
+ */
+.sc-marquee-track {
+  display: flex;
+  gap: 6px;
+  width: max-content;
+  animation: sc-marquee linear infinite;
+  animation-duration: var(--marquee-duration, 60s);
+  will-change: transform;
+}
+
+@keyframes sc-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.sc-chip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  padding: 0 8px;
+  height: 25px;
+  font-size: 11px;
+  font-family: var(--font-cn);
+  white-space: nowrap;
+}
+
+.sc-chip[data-kind='laurel'] {
+  /* 花枝几乎贴着 chip 两端，所以这一种 chip 的内边距比另外两种小得多。 */
+  gap: 2px;
+  background: #f6f3ec;
+  padding: 0 1px;
+  color: #6b5a3e;
+}
+
+.sc-chip[data-kind='shop'],
+.sc-chip[data-kind='thumb'] {
+  background: #fdeff0;
+  color: #c8323c;
+}
+
+.sc-chip-icon {
+  flex: none;
+  width: 12.7px;
+  height: 12.5px;
+}
+
+/* 左右两支是各自切出来的，不是镜像，所以宽度略有差别。 */
+.sc-laurel {
+  flex: none;
+  width: 7.4px;
+  height: 15px;
+}
+
+.sc-chip[data-kind='laurel'] .sc-laurel:last-child {
+  width: 7.5px;
+}

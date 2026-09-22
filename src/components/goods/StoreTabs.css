@@ -1,0 +1,125 @@
+.store-tabs {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #fff;
+  pointer-events: auto;
+}
+
+.store-tabs__search {
+  display: block;
+  width: 100%;
+  height: 42px;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.store-tabs__row {
+  position: relative;
+  width: 100%;
+}
+
+.store-tabs__row--wrapped {
+  height: 36px;
+  margin-top: 12px;
+}
+
+.store-tabs__row--bare {
+  height: 40px;
+}
+
+.store-tabs__item {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-cn);
+  cursor: pointer;
+  border-radius: 4px;
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease,
+    opacity 0.22s ease;
+}
+
+/*
+ * 设计稿 `4012:13705` 的 Tabs：选中项是 96×36 / 圆角 100 / #f5f5f5 的浅灰胶囊 + 500 字重，
+ * 未选中项无底色、400 字重、整体 60% 不透明度。不是下划线 tab，也不是黑底反白。
+ */
+.store-tabs__row--wrapped .store-tabs__item {
+  height: 36px;
+  border-radius: 100px;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.store-tabs__row--wrapped .store-tabs__item.is-active {
+  background: var(--color-gray-100);
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.store-tabs__row--wrapped .store-tabs__label {
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.store-tabs__row--wrapped .store-tabs__item.is-active .store-tabs__label {
+  font-weight: 500;
+}
+
+.store-tabs__row--bare .store-tabs__item {
+  height: 40px;
+}
+
+.store-tabs__label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.store-tabs__row--bare .store-tabs__label {
+  font-size: 14px;
+}
+
+.store-tabs__sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.1;
+}
+
+.store-tabs__row--bare .store-tabs__item.is-active .store-tabs__sub {
+  color: rgb(255 255 255 / 72%);
+}
+
+.store-tabs__item.is-active .store-tabs__label {
+  font-weight: 600;
+}
+
+.store-tabs__underline {
+  display: none;
+}
+
+.store-tabs__row--bare .store-tabs__item.is-active {
+  background: var(--text-primary);
+  color: var(--text-on-dark);
+  border-radius: 4px;
+}
+
+.store-tabs__item:disabled {
+  cursor: default;
+}
+
+/* wrapped 的禁用态已经是设计稿那 60%，只有 Kids 的裸 tab 需要再压暗。 */
+.store-tabs__row--bare .store-tabs__item:disabled {
+  opacity: 0.4;
+}

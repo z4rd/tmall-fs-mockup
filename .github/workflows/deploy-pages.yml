@@ -1,0 +1,53 @@
+# 构建并发布到 GitHub Pages（仓库 Settings → Pages → Source: GitHub Actions）。
+#
+# 注意：私有仓库的 Pages 发布不在 GitHub Free 里。仓库保持 private 时本 workflow 的
+# build 会正常跑完，但 deploy 会在「Pages 未启用」处失败。要真正发布，二选一：
+#   - 升级 GitHub Pro（私有仓库 + 公开站点）
+#   - 把仓库临时切成 public
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install & test & build
+        env:
+          VITE_ACCESS_CODE: ${{ secrets.VITE_ACCESS_CODE }}
+        run: |
+          npm ci
+          npm run test
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

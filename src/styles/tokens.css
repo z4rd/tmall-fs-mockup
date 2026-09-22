@@ -1,0 +1,83 @@
+/**
+ * 设计 token。
+ *
+ * 颜色、圆角、间距取自 Figma 的 Podium 变量集（对 FS - Men / FS - Women 调用
+ * `get_variable_defs`）。标注「实测」的值没有绑定到变量，是从导出帧上取样得到的。
+ *
+ * 一律按设计 px 书写；PostCSS 插件会把这里的每个 px 改写成 calc(N * var(--u))。
+ * `--u` 由 ScaleViewport 发布在 :root 上，这正是这些 token 能按 stage 宽度求值
+ * 的原因。
+ */
+:root {
+  /* 品牌色 */
+  --color-black: #111111;
+  --color-white: #ffffff;
+  --color-red: #ee0005;
+
+  /* 中性灰 */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #cacacb;
+  --color-gray-400: #9e9ea0;
+  --color-gray-500: #707072;
+  --color-gray-900: #1f1f21;
+
+  /* 语义色 */
+  --text-primary: #111111;
+  --text-secondary: #707072;
+  --text-on-dark: #ffffff;
+  --element-shadow: #1111111f;
+  --border-subtle: #9e9ea0;
+
+  /* 背景面（实测） */
+  --surface-page: #f8f9fb;
+  --surface-lookbook-panel: #e8e8e8;
+  --surface-lookbook-strip: #ececea;
+
+  /* 圆角 */
+  --radius-l2: 4px;
+  --radius-l3: 8px;
+  --radius-pill: 100px;
+
+  /* 间距 */
+  --space-small: 12px;
+  --space-medium: 24px;
+  --space-large: 48px;
+
+  /* 布局（量自 FS - Men / FS - Women） */
+  --page-width: 375px;
+  --content-width: 363px;
+  --content-gutter: 6px;
+  --floor-gap: 40px;
+  --bottom-nav-height: 70px;
+
+  /* 字体 */
+  --font-latin: 'Helvetica Now Text', -apple-system, BlinkMacSystemFont, Helvetica, Arial,
+    sans-serif;
+  --font-cn: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-body: var(--font-cn), var(--font-latin);
+
+  /* 动效 —— 以下每个值都量自 tmallref.mp4，见文档 §6 */
+  --dur-tab-switch: 300ms;
+  --ease-tab-switch: linear;
+  --dur-lookbook-expand: 420ms;
+  --ease-lookbook-expand: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-lookbook-collapse: 320ms;
+  --ease-lookbook-collapse: cubic-bezier(0.4, 0, 1, 1);
+  --marquee-speed: 12.4; /* px per second at 375 design width */
+}
+
+/**
+ * 运动空间的主题色，取样自 14 张 tab 画板。
+ * 当前激活的主题把这几个值设在模块根节点上。
+ */
+:root {
+  --theme-basketball: #111111;
+  --theme-running: #dcff00;
+  --theme-football: #000000;
+  --theme-training: #111111;
+  --theme-sportswear: #e60023;
+  --theme-acg: #fc7233;
+  --theme-tennis: #000000;
+}

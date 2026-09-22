@@ -1,0 +1,159 @@
+@import './TmallChrome.css';
+
+/* 宝贝页顶栏：与 `.cs` 同套 --collapse / --morph，高度略矮（无下拉直播间提示行）。 */
+.gcs {
+  position: absolute;
+  z-index: 40;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: calc((100 - 39 * var(--collapse, 0)) * var(--u));
+  overflow: hidden;
+  color: #fff;
+  contain: layout paint style;
+  pointer-events: none;
+}
+
+.gcs .gcs-back,
+.gcs .gcs-follow,
+.gcs .gcs-dots {
+  pointer-events: auto;
+}
+
+:root[data-chrome-dark='false'] .gcs {
+  color: var(--color-black);
+}
+
+.gcs-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 130% at 88% 12%, #9b6f6b 0%, rgb(155 111 107 / 0%) 58%),
+    radial-gradient(110% 120% at 6% 78%, #8d8487 0%, rgb(141 132 135 / 0%) 62%),
+    linear-gradient(168deg, #5d6062 0%, #63696c 52%, #6f7477 100%);
+}
+
+:root[data-chrome-dark='false'] .gcs .gcs-bg {
+  background: #fff;
+  box-shadow: inset 0 -0.5px 0 rgb(17 17 17 / 8%);
+}
+
+.gcs .cs-status {
+  position: relative;
+}
+
+.gcs-back {
+  position: absolute;
+  top: 68px;
+  left: 16px;
+  color: inherit;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.gcs-back svg {
+  display: block;
+  width: 15px;
+  height: 14px;
+}
+
+.gcs-logo {
+  position: absolute;
+  top: 61px;
+  left: 42px;
+  opacity: calc((var(--morph, 0) - 0.45) / 0.55);
+  transform: translate3d(0, calc((1 - var(--morph, 0)) * 30 * var(--u)), 0);
+}
+
+.gcs-pill {
+  position: absolute;
+  top: 61px;
+  left: calc((42 + 54 * var(--morph, 0)) * var(--u));
+  display: flex;
+  align-items: center;
+  width: calc((289 - 115 * var(--morph, 0)) * var(--u));
+  height: 35px;
+  border-radius: 100px;
+  background: rgb(17 17 17 / 22%);
+  padding: 0 44px 0 16px;
+}
+
+:root[data-chrome-dark='false'] .gcs .gcs-pill {
+  background: #f0f3f4;
+}
+
+/* 主店宝贝分类稿：搜索胶囊为浅绿底（对齐 Figma Header2 男子主题）。 */
+:root[data-chrome-dark='false'] .gcs--nike .gcs-pill {
+  background: #e3f0ea;
+}
+
+.gcs-keyword {
+  flex: 1;
+  overflow: hidden;
+  opacity: 0.72;
+  font-size: 14px;
+  font-family: var(--font-cn);
+  white-space: nowrap;
+}
+
+.gcs-divider {
+  position: absolute;
+  top: 10px;
+  right: 38.5px;
+  width: 1px;
+  height: 15px;
+  background: currentColor;
+  opacity: 0.22;
+}
+
+.gcs-search {
+  position: absolute;
+  top: 8.5px;
+  right: 11.5px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.85;
+}
+
+.gcs-follow {
+  position: absolute;
+  top: 64px;
+  left: 275px;
+  width: 54px;
+  height: 29px;
+  border: none;
+  border-radius: 100px;
+  background: rgb(255 255 255 / 26%);
+  color: inherit;
+  font-size: 12px;
+  font-family: var(--font-cn);
+  line-height: 29px;
+  text-align: center;
+  opacity: calc((var(--morph, 0) - 0.45) / 0.55);
+  transform: translate3d(0, calc((1 - var(--morph, 0)) * 30 * var(--u)), 0);
+  cursor: pointer;
+}
+
+:root[data-chrome-dark='false'] .gcs .gcs-follow {
+  background: var(--color-gray-300);
+  color: #6f6f72;
+}
+
+.gcs-dots {
+  position: absolute;
+  top: 76px;
+  left: 339px;
+  color: inherit;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.gcs-dots svg {
+  display: block;
+  width: 19px;
+  height: 4px;
+}

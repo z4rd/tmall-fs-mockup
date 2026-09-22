@@ -1,0 +1,16 @@
+.jordan-preview {
+  padding: 24px 14px 40px;
+  background: var(--surface-page);
+}
+
+.jordan-preview-hero {
+  border-radius: var(--radius-l2);
+  background: linear-gradient(145deg, #1f1f21 0%, #707072 100%);
+}
+
+.jordan-preview-note {
+  margin: 16px 6px 0;
+  color: var(--color-gray-500);
+  font-size: 12px;
+  line-height: 1.5;
+}

@@ -1,0 +1,40 @@
+.home {
+  min-height: 100%;
+  background: var(--surface-page);
+}
+
+/* 楼层位于 363 宽的栏内，左右各 6px 槽；楼层间距固定 40px。
+   主体从页面 y266 开始，即店铺卡（y141 + h123）下方 2px。 */
+.home-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--floor-gap);
+  margin: 2px auto 0;
+  width: var(--content-width);
+  padding-bottom: 40px;
+}
+
+.floor-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed var(--color-gray-300);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--color-gray-400);
+  font-family: var(--font-cn);
+}
+
+.floor-stub-title {
+  color: var(--color-gray-500);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.floor-stub-meta {
+  font-size: 10px;
+  font-family: var(--font-latin);
+  letter-spacing: 0.3px;
+}

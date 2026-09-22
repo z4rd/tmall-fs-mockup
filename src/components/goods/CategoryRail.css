@@ -1,0 +1,51 @@
+.category-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 83px;
+}
+
+.category-rail__item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 83px;
+  /* 最长的「网球高尔夫」在设计稿里仍是 14px、左右各留 7px，内边距不能再吃掉宽度。 */
+  padding: 0 2px;
+  border: 1px solid rgba(202, 202, 203, 0.8);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--text-primary);
+  font-family: var(--font-cn);
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    transform 0.12s ease;
+}
+
+.category-rail__label {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.category-rail__item.is-active {
+  border-color: var(--text-primary);
+  background: var(--text-primary);
+  color: var(--text-on-dark);
+}
+
+.category-rail__item.is-disabled {
+  opacity: 0.45;
+  cursor: default;
+}

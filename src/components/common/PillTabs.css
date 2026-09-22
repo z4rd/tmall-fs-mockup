@@ -1,0 +1,163 @@
+.pill-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.pill-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.pill-tabs__track {
+  position: relative;
+  height: 32px;
+}
+
+.pill-tabs__item {
+  position: absolute;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  margin: 0;
+  padding: 0 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--color-white);
+  color: var(--text-primary);
+  font-family: var(--font-cn);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pill-tabs:not(.pill-tabs--bubble) .pill-tabs__item.is-active {
+  border-color: var(--text-primary);
+  background: var(--text-primary);
+  color: var(--text-on-dark);
+}
+
+.pill-tabs__label {
+  position: relative;
+  z-index: 1;
+}
+
+.pill-tabs:not(.pill-tabs--bubble) .pill-tabs__active {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--text-primary);
+}
+
+.pill-tabs--dark:not(.pill-tabs--bubble) .pill-tabs__item {
+  border-color: transparent;
+  background: transparent;
+  color: #fff;
+}
+
+.pill-tabs--dark:not(.pill-tabs--bubble) .pill-tabs__item.is-active {
+  border-color: transparent;
+  background: transparent;
+  color: #fff;
+}
+
+.pill-tabs--dark:not(.pill-tabs--bubble) .pill-tabs__active {
+  background: #2c2c2e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 运动专区 Tab - Sports：透明轨道 + 52/80/94×32 玻璃选中胶囊（Figma 4020:9323 / 4020:9398） */
+.pill-tabs--bubble {
+  /* 字色变量由外层（如 .sports-zone__tabs）注入；勿在此重定义，否则会盖住继承值 */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.pill-tabs--bubble .pill-tabs__track {
+  height: 32px;
+}
+
+.pill-tabs--bubble .pill-tabs__item {
+  top: 0;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--font-cn);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 21px;
+  transition: color 200ms linear;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pill-tabs--bubble .pill-tabs__item.is-active {
+  border: none;
+  background: transparent;
+  font-weight: 500;
+}
+
+.pill-tabs--bubble .pill-tabs__label {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.pill-tabs--bubble .pill-tabs__label--tight {
+  font-size: 14px;
+  letter-spacing: -0.02em;
+}
+
+/*
+ * 选中胶囊 = Figma Liquid Glass Regular Small（BG 4020:9323 / 4020:9398，两者同为 Light 变体，
+ * Fill + Shadow 完全一致，所以只有一套玻璃，没有浅底 / 深底两张皮）。
+ *
+ * 玻璃的本质是**去饱和**，不是压暗或提亮。按整帧渲染的完整 RGB 实测：
+ *   跑步 Volt 面板 rgb(220,255,0) → 胶囊 rgb(224,240,120)：亮度几乎不变，蓝通道 0→120
+ *   篮球 中性黑 rgb(17,17,17)   → 胶囊 rgb(39,39,39)：三通道同步 +22
+ * 解出同时满足两者的单一模型：去饱和到 .48 + 9.2% 白，三通道残差均在 3/255 内。
+ * 深浅两种底共用这一套，与 Figma 只有一个 variantMode="Light" 变体自洽。
+ *
+ * 不要再用 pill-light.png / pill-dark.png 的 151 / 57 反推 alpha —— 那是 Figma 在无背景时的
+ * 退化渲染，不是真实合成值。`data-pill-skin` 目前只作 DevTools 标记，不参与取值。
+ */
+.pill-tabs--bubble .pill-tabs__active--skin {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  height: 32px;
+  border-radius: 16px;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(6px) saturate(0.48);
+  backdrop-filter: blur(6px) saturate(0.48);
+  /* 白叠加沿纵向 9.2% → 17%，末段回落，与两张稿一致的顶暗底亮走向。 */
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.092) 20%,
+    rgba(255, 255, 255, 0.13) 65%,
+    rgba(255, 255, 255, 0.17) 92%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  /* 顶沿镜面高光：篮球稿实测 62，等效白 .19。 */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.19);
+  transition:
+    left 300ms linear,
+    width 300ms linear;
+}
+

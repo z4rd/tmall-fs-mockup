@@ -1,0 +1,20 @@
+.page-back-chrome {
+  position: absolute;
+  z-index: 35;
+  top: 68px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -14px;
+  padding: 14px;
+  color: var(--text-primary);
+}
+
+.page-back-chrome svg {
+  display: block;
+  width: 15px;
+  height: 14px;
+}

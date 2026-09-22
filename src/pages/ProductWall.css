@@ -1,0 +1,55 @@
+.pw {
+  position: relative;
+  min-height: 100%;
+  background: var(--surface-page);
+}
+
+/* 与 `TmallChrome` `.cs-back` / 天猫原生顶栏 ← 同位（`chromeGeometry` BACK_X + searchrow y68） */
+.pw-back {
+  position: absolute;
+  z-index: 3;
+  top: 68px;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  margin: -14px;
+  padding: 14px;
+  /* 透明热区：位图已含原生 ←，勿再叠 `PageBackChrome` 矢量 */
+}
+
+.pw-picture {
+  display: block;
+  width: 100%;
+}
+
+.pw-img {
+  width: 100%;
+  height: auto;
+  vertical-align: top;
+}
+
+.pw-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 600px;
+  padding: 80px 24px 40px;
+  text-align: center;
+  font-family: var(--font-cn);
+}
+
+.pw-ph-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.pw-ph-meta,
+.pw-ph-note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}

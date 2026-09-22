@@ -1,0 +1,9 @@
+{
+  "name": "NIKE Tmall FS Mockup",
+  "short_name": "Tmall Mockup",
+  "display": "standalone",
+  "background_color": "#f8f9fb",
+  "theme_color": "#f8f9fb",
+  "start_url": "./#/",
+  "scope": "./"
+}

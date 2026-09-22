@@ -1,0 +1,35 @@
+/**
+ * 一律自托管 —— fonts.gstatic.com 在大陆不可靠，而评审是在微信里打开这个页面的。
+ *
+ * Medium 那个文件内部声明的 family 是 "Helvetica Now Text Medium"、subfamily 是
+ * "Regular"（旧式命名），所以两个字重必须写成各自独立的 @font-face 并显式指定
+ * font-weight。不要让浏览器按 family 名把它们归成一组，也不要让它合成粗体。
+ *
+ * unicode-range 把拉丁字符钉在 Helvetica Now Text 上，其余字符 —— 中日韩，以及
+ * 这个字体并不包含的全角人民币符号 U+FFE5 —— 确定性地落到 Noto Sans SC。
+ *
+ * U+0000-00FF 这段刻意保留了 U+00A5：两个字体文件都带 `yen` 字形，字宽分别是
+ * 640（400）/ 650（500），正好等于它们自己的数字字宽，因此价格能和旁边的数字
+ * 对齐。Noto 的 U+00A5 是 521、U+FFE5 是整个 em，这就是为什么价格要在
+ * src/lib/price.ts 里统一归一到 U+00A5、而不是任其回落。不要把这段范围收窄到
+ * 把 U+00A5 排除掉。
+ */
+@font-face {
+  font-family: 'Helvetica Now Text';
+  src: url('/fonts/HelveticaNowText.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2074, U+20AC,
+    U+2122, U+2191, U+2193, U+2212, U+2215;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Text';
+  src: url('/fonts/HelveticaNowTextMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2074, U+20AC,
+    U+2122, U+2191, U+2193, U+2212, U+2215;
+}

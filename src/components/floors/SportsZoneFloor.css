@@ -1,0 +1,78 @@
+.sports-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding-top: 8px;
+}
+
+.sports-zone__card {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 8px 0 0;
+  /* 面板切图 375 宽左对齐；tab 条叠在切图 y68，不能裁切 */
+  overflow: visible;
+  border-radius: var(--radius-l2);
+  background: #111;
+}
+
+.sports-zone__viewport {
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  touch-action: pan-y;
+}
+
+.sports-zone__track {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  transition: transform 300ms linear;
+  will-change: transform;
+}
+
+.sports-zone__page {
+  position: relative;
+  flex: 0 0 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111;
+}
+
+.sports-zone__shot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 切图为 375 宽整帧，363 栏 cover 时必须左对齐，否则 x8 tab 与背景错位 */
+  object-position: left top;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sports-zone__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #fff;
+  font-family: var(--font-cn);
+  font-size: 16px;
+}
+
+/*
+ * 运动专区 tab 条：相对 375 主题切图左上（与 object-position:left top 同源）。
+ */
+.sports-zone__tabs {
+  position: absolute;
+  z-index: 4;
+  top: calc(77 * var(--u));
+  right: calc(13 * var(--u));
+  left: calc(13 * var(--u));
+  width: auto;
+  height: calc(32 * var(--u));
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+}

@@ -1,0 +1,113 @@
+/**
+ * 数值全部量自 3.216x 原始截图（见 data/bottomNav.ts），此处直接以设计 px 书写，
+ * 由 PostCSS 改写成 calc(N * var(--u))。
+ */
+
+.bnav {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 70px;
+  background: #f8f7f8;
+}
+
+/* 原图第 0/1/3 行亮度与条身完全一致，说明**没有**顶部分割线或投影。 */
+
+/* ---------- 分隔竖线 ---------- */
+
+.bnav-divider {
+  position: absolute;
+  top: 19px;
+  width: 0.5px;
+  height: 12px;
+  background: #e5e8ec;
+}
+
+/* ---------- 导航项 ---------- */
+
+/*
+ * 各项按中心定位：left 给到格心，再用 translateX(-50%) 拉回。
+ * 内容整体压在上半部（y8–45），下面留给 iOS home indicator 区域。
+ */
+.bnav-item {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 49.4px;
+  transform: translateX(-50%);
+}
+
+.bnav-label {
+  position: relative;
+  color: #141c30;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: var(--font-cn);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bnav-item[data-active='true'] .bnav-label {
+  color: #fd6404;
+}
+
+/* ---------- 「新风潮」角标 ---------- */
+
+/*
+ * 量得 22.4 × 10，挂在「页」字右上角并向右溢出约 16px。定位锚在 .bnav-label
+ * 右上角，所以它跟着文字块走而不是跟着格心走。
+ */
+.bnav-badge {
+  position: absolute;
+  top: -4.8px;
+  left: 28.4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22.4px;
+  height: 10px;
+  border-radius: 100px;
+  background: linear-gradient(100deg, #fb3c67 0%, #eb1133 100%);
+  color: #fff;
+  font-size: 6.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.1px;
+}
+
+/* ---------- 中间「运动空间」胶囊 ---------- */
+
+.bnav-item[data-raised='true'] {
+  /* 胶囊比文字项高，单独给高度让它按 y8.4 起始居中。 */
+  height: 53.5px;
+}
+
+.bnav-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  width: 61.6px;
+  height: 36.7px;
+  border-radius: 100px;
+  /* 沿中线取样：12% 处 #FF7913，50% 处 #FD5505，88% 处 #FB420E。 */
+  background: linear-gradient(96deg, #ff8017 0%, #fd5505 50%, #fb420e 100%);
+}
+
+.bnav-pill .swoosh {
+  display: block;
+}
+
+.bnav-pill-label {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  font-family: var(--font-cn);
+  line-height: 1;
+  letter-spacing: -0.2px;
+}
