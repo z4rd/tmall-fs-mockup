@@ -1,20 +1,15 @@
 import type { StoreVariant } from './storeFloors';
 
-/** ACG 首页楼层子 frame（hero 由实拍视频替代，见 `StoreHome`）。 */
+/** ACG 首页楼层子 frame。 */
 export const ACG_FLOOR_FIGMA: Record<string, string> = {
-  'doorway-4': '2553:71386',
-  'new-arrivals-1': '2553:71885',
-  'sports-zone-a': '2553:71407',
-  'sports-zone-b': '2553:71448',
-  'story-kdoy': '2553:71511',
-  'grid-1': '2553:71566',
-  'banner-cdp': '2553:71645',
-  'grid-2': '2553:71719',
-  'new-arrivals-2': '2553:71785',
-  'brand-matrix': '2553:71846',
-  // 设计稿里还有一个 `2553:71883`「closing」帧，声明 375×729 但隔离渲染只有 375×6，
-  // 是空的废弃帧，不入楼层表。见 `storeFloors.ts` 的 `ACG_FLOORS` 注释。
-  // 注意 Jordan 也有一个 `closing`（`2472:16681`，391 高），那个是正常楼层，别一起清掉。
+  hero: '4138:3279',
+  'doorway-4': '4138:3306',
+  'new-arrivals-1': '4138:3246',
+  membership: '4136:2631',
+  'sports-zone-a': '4138:3669',
+  'sports-zone-b': '4138:3374',
+  'grid-1': '4138:3717',
+  'grid-2': '4138:3808',
 };
 
 /** Jordan 首页楼层（P1 含 hero 位图；无独立 hero 视频）。 */

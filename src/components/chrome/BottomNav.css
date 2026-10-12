@@ -28,7 +28,8 @@
 }
 
 /* Kids：平涂，无渐变。`kids-center.png` 是不透明矩形切图，正是靠这一点看不出接缝。 */
-.bnav[data-store='kids'] {
+.bnav[data-store='kids'],
+.bnav[data-store='commercial'] {
   background: #fcfcfc;
 }
 

@@ -7,6 +7,7 @@ export type CategoryRailItem = { key: string; label: string };
 export type CategoryRailProps = {
   items: CategoryRailItem[];
   activeKey: string;
+  tone?: 'default' | 'commercial';
   isEnabled?: (key: string) => boolean;
   onSelect: (key: string) => void;
 };
@@ -17,11 +18,18 @@ export type CategoryRailProps = {
  *
  * 四店（含 Kids 三个 family）共用设计稿同一个组件，几何与排版完全一致，
  * 条目数 5~13 条的差异只体现在轨道高度上，见 `CategoryRail.css` 的注释。
- * 选中态只有「填充 #111 + 文字转白」，**没有**竖条指示器、也没有字重差异。
+ * 默认选中态只有「填充 #111 + 文字转白」，**没有**竖条指示器、也没有字重差异。
+ * 双 11 会场的左导选中态是折扣金纯色卡，走 `tone="commercial"` 的样式分支。
  */
-export function CategoryRail({ items, activeKey, isEnabled, onSelect }: CategoryRailProps) {
+export function CategoryRail({
+  items,
+  activeKey,
+  tone = 'default',
+  isEnabled,
+  onSelect,
+}: CategoryRailProps) {
   return (
-    <nav className="category-rail" aria-label="宝贝类目">
+    <nav className={`category-rail category-rail--${tone}`} aria-label="宝贝类目">
       {items.map((item) => {
         const enabled = isEnabled ? isEnabled(item.key) : true;
         const active = item.key === activeKey;

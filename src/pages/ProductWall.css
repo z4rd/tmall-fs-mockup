@@ -30,14 +30,25 @@
   background: rgb(0 0 0 / 8%);
 }
 
+/*
+ * 产品墙这一页的状态栏不是 `StatusBar` 组件画的，而是**烤死在整屏位图里的**
+ * （四张 webp 顶部都带 13:13 / 5G / 电量，压在同一条橙色渐变上）。真机要下线它，
+ * 只能把位图的顶部 `--sb-drop` 裁掉。
+ *
+ * `overflow: hidden` 有两个作用，缺一不可：裁掉被负 margin 提上去的那一段，
+ * 以及建立 BFC —— 否则 `.pw-img` 的负 margin-top 会与 `.pw-picture` 的外边距合并，
+ * 把整个 `.pw` 一起往上拽，连带把 `.pw-back` 的包含块也拖走。
+ */
 .pw-picture {
   display: block;
+  overflow: hidden;
   width: 100%;
 }
 
 .pw-img {
   width: 100%;
   height: auto;
+  margin-top: calc(-1 * var(--sb-drop));
   vertical-align: top;
 }
 

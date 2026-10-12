@@ -1,0 +1,69 @@
+# 构建并发布到 Cloudflare Pages（境内访问的主链路）。
+#
+# 与 deploy-pages.yml（GitHub Pages）并行存在、互不干扰：两条 workflow 各自
+# 跑一次 `npm run build`，产物完全一致（vite `base: './'` 相对路径，子路径和
+# 根路径都能跑）。GitHub Pages 发在 /tmall-fs-mockup/ 子路径，Cloudflare Pages
+# 发在 <project>.pages.dev 根路径。
+#
+# 需要在仓库 Settings → Secrets and variables → Actions 配置两个 secret：
+#   CLOUDFLARE_API_TOKEN   —— 权限模板 "Edit Cloudflare Workers"，或自定义
+#                             Account › Cloudflare Pages › Edit
+#   CLOUDFLARE_ACCOUNT_ID  —— Cloudflare 控制台右侧栏的 Account ID
+# 未配置时本 workflow 会自动跳过部署（不会红），不影响 GitHub Pages。
+#
+# 刻意不注入 VITE_ACCESS_CODE：不设置时 accessCode.ts 回落到内置默认口令
+# tmall2026，比"配了个空串"更不容易出错。
+name: Deploy Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检查 Cloudflare 凭证
+        id: guard
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$ACCOUNT" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::未配置 CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID，跳过 Cloudflare Pages 部署"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install & build
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.guard.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # 项目名需与 Cloudflare Pages 里创建的项目一致（首次直传时自动创建）。
+          command: pages deploy dist --project-name=tmall-fs-mockup --branch=main

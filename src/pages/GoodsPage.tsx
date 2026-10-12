@@ -5,6 +5,7 @@ import { CategoryRail } from '../components/goods/CategoryRail';
 import { GoodsIndexTabs } from '../components/goods/GoodsIndexTabs';
 import { GoodsTopBand } from '../components/goods/GoodsTopBand';
 import { StoreTabs } from '../components/goods/StoreTabs';
+import { AvifSource, PictureShell, ResponsiveImage } from '../components/media/ResponsiveImage';
 import {
   DEFAULT_CATEGORY,
   GOODS_STORES,
@@ -89,14 +90,26 @@ function buildFamilyTabs(
     const goodsFamily = family as GoodsFamily;
     const tabItems = goodsTabsForFamily(goodsFamily);
     const tabActiveKey = goodsFamily === 'commercial' ? 'commercial' : goodsFamily;
+    /*
+     * 双 11 态只允许留在「双11专区」：男子 / 女子 / 儿童 tab 都是设计里的死链占位，
+     * 避免从 commercial 语境跳到常规主店分类页。
+     */
+    const tabEnabled = (key: string) => (goodsFamily === 'commercial' ? key === 'commercial' : true);
     return (
       <StoreTabs
         variant="wrapped"
         items={tabItems}
         activeKey={tabActiveKey}
-        isEnabled={(key) => key !== 'kids'}
+        isEnabled={tabEnabled}
         onChange={(key) => {
-          if (key === 'kids') return;
+          if (!tabEnabled(key)) return;
+          if (key === 'kids') {
+            navigate(
+              goodsPath({ store: 'nike', view: 'category', family: 'kids', category: 'new' }),
+              { replace: true },
+            );
+            return;
+          }
           const next = parseGoodsFamily(key);
           if (!next) return;
           navigate(
@@ -165,15 +178,27 @@ function GoodsBrowseView({
     >
       <GoodsSharedChrome store={store} />
 
+      {/* `indexTabRowTop` 是页面绝对 y，真机下线假状态栏后要跟着位图一起上移
+          `--sb-drop`；遮盖带高度是相对量，不动。 */}
       <div
         className="goods-page__index-cover"
-        style={{ top: u(design.indexTabRowTop), height: u(coverHeight) }}
+        style={{
+          top: `calc(${u(design.indexTabRowTop)} - var(--sb-drop))`,
+          height: u(coverHeight),
+        }}
       >
         <GoodsIndexTabs store={store} family={family} view="browse" />
       </div>
 
       <div className="goods-page__landing-shell">
-        <img className="goods-page__landing" src={goodsLandingSrc(store)} alt="" decoding="async" />
+        <ResponsiveImage
+          className="goods-page__landing"
+          src={goodsLandingSrc(store)}
+          alt=""
+          decoding="async"
+          loading="eager"
+          fetchPriority="high"
+        />
       </div>
     </div>
   );
@@ -256,6 +281,7 @@ function GoodsCategoryView({
           <CategoryRail
             items={categories}
             activeKey={category}
+            tone={store === 'nike' && family === 'commercial' ? 'commercial' : 'default'}
             isEnabled={categoryEnabled}
             onSelect={(key) =>
               navigate(goodsPath({ store, view: 'category', family, category: key }), {
@@ -270,21 +296,26 @@ function GoodsCategoryView({
             <>
               {!sheetReady ? <span className="goods-page__sheet-skeleton" aria-hidden="true" /> : null}
               <AnimatePresence mode="sync" initial={false}>
-                <motion.img
-                  ref={imgRef}
-                  key={motionKey}
-                  className={`goods-page__sheet${sheetReady ? ' is-ready' : ''}`}
-                  src={sheetSrc}
-                  alt=""
-                  loading="eager"
-                  decoding="async"
-                  initial={SHEET_MOTION.initial}
-                  animate={sheetReady ? SHEET_MOTION.animate : { opacity: 0, y: 8 }}
-                  exit={SHEET_MOTION.exit}
-                  transition={SHEET_MOTION.transition}
-                  onLoad={() => setSheetReady(true)}
-                  onError={() => setSheetFailed(true)}
-                />
+                {/* `<picture>` 是 `display: contents`，不占盒子；`AnimatePresence` 要的 key 挂在它身上，
+                    退场动画仍由里面的 `motion.img` 通过 PresenceContext 执行。 */}
+                <PictureShell key={motionKey}>
+                  <AvifSource src={sheetSrc} />
+                  <motion.img
+                    ref={imgRef}
+                    className={`goods-page__sheet${sheetReady ? ' is-ready' : ''}`}
+                    src={sheetSrc}
+                    alt=""
+                    loading="eager"
+                    decoding="async"
+                    {...({ fetchpriority: 'high' } as Record<string, string>)}
+                    initial={SHEET_MOTION.initial}
+                    animate={sheetReady ? SHEET_MOTION.animate : { opacity: 0, y: 8 }}
+                    exit={SHEET_MOTION.exit}
+                    transition={SHEET_MOTION.transition}
+                    onLoad={() => setSheetReady(true)}
+                    onError={() => setSheetFailed(true)}
+                  />
+                </PictureShell>
               </AnimatePresence>
             </>
           ) : (

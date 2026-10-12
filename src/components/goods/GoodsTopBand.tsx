@@ -39,11 +39,16 @@ const CARD_TOP = 96.5;
  * 把 Kids 那张矮 35 的卡片的空白补齐。
  */
 export function GoodsTopBand({ store }: { store: 'nike' | 'acg' | 'jordan' | 'kids' }) {
+  // 223 与 96.5 都是「从页顶算」的母版坐标，真机下线假状态栏后同步上移 `--sb-drop`；
+  // 两者减同一个量，所以卡片在带内的相对位置一点不变。
   return (
     <div
       className="goods-topband"
       data-store={store}
-      style={{ height: u(GOODS_CHROME_TOP_PX), paddingTop: u(CARD_TOP) }}
+      style={{
+        height: `calc(${u(GOODS_CHROME_TOP_PX)} - var(--sb-drop))`,
+        paddingTop: `calc(${u(CARD_TOP)} - var(--sb-drop))`,
+      }}
     >
       <StoreInfoCard />
     </div>

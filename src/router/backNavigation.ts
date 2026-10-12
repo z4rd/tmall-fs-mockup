@@ -53,7 +53,7 @@ export function resolveGoodsBackPath(pathname: string, state: unknown): string {
   const browse = goodsBrowsePath({ store, family });
   if (pathname !== browse) return browse;
 
-  const home = storeHomePath(store, family);
+  const home = storeHomePath(store, family === 'kids' ? undefined : family);
   const last = getLastShopPath();
   // 最近店铺页只有在同属当前店铺时才可信，否则宁可回该店的规范首页。
   return last && storeIdFromPath(last) === store ? last : home;

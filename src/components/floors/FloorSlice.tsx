@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Floor } from '../../data/floors';
 import type { FloorAssetVariant } from '../../data/floorAssets';
@@ -11,6 +12,7 @@ import {
   goodsCategoryPathForFloorVariant,
   homePathForFloorVariant,
 } from '../../data/floorNavigation';
+import { ResponsiveImage } from '../media/ResponsiveImage';
 import { u } from '../../lib/u';
 import './FloorSlice.css';
 
@@ -20,6 +22,9 @@ type FloorSliceProps = {
   /** 为 false 时整块不可点（Commercial 全 Tier C） */
   clickable?: boolean;
   listFrom?: string;
+  /** 首屏第一层：跳过懒加载并抢带宽，别跟下面那串 lazy 图排队。 */
+  priority?: boolean;
+  style?: CSSProperties;
 };
 
 /**
@@ -33,6 +38,8 @@ export function FloorSlice({
   variant,
   clickable = true,
   listFrom,
+  priority = false,
+  style,
 }: FloorSliceProps) {
   const navigate = useNavigate();
   const src = floorSliceSrc(variant, floor.key);
@@ -72,18 +79,19 @@ export function FloorSlice({
       className={`floor-slice${isHot ? ' floor-slice--hot' : ''}${showPlaceholder ? '' : ' floor-slice--has-img'}${isEmbeddedCardFloor ? ' floor-slice--embedded-card' : ''}`}
       data-floor={floor.key}
       data-variant={variant}
-      style={{ height: u(floor.height) }}
+      style={{ ...style, height: u(floor.height) }}
       aria-label={floor.title || floor.key}
     >
       {!showPlaceholder ? (
         <>
           {!imgReady ? <span className="floor-slice__skeleton" aria-hidden="true" /> : null}
-          <img
+          <ResponsiveImage
             ref={imgRef}
             className={`floor-slice__img${imgReady ? ' is-ready' : ''}`}
             src={src}
             alt=""
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : undefined}
             decoding="async"
             onLoad={() => setImgReady(true)}
             onError={() => setImgFailed(true)}

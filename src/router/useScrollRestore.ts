@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import { useScroller } from '../components/layout/ScrollerContext';
 import { ROUTE_MOTION_MS } from './RouteMotion';
+
+const positions = new Map<string, number>();
 
 /**
  * 内部滚动容器的按路由滚动位置记忆。
@@ -13,14 +15,13 @@ export function useScrollRestore() {
   const scroller = useScroller();
   const { key, pathname } = useLocation();
   const navType = useNavigationType();
-  const positions = useRef(new Map<string, number>());
 
   useEffect(() => {
     if (!scroller) return;
 
     const applyScroll = () => {
       if (navType === 'POP') {
-        scroller.scrollTop = positions.current.get(key) ?? 0;
+        scroller.scrollTop = positions.get(key) ?? 0;
       } else {
         scroller.scrollTop = 0;
       }
@@ -31,9 +32,11 @@ export function useScrollRestore() {
     const timer = window.setTimeout(applyScroll, delay);
     if (delay === 0) applyScroll();
 
-    const onScroll = () => positions.current.set(key, scroller.scrollTop);
+    const save = () => positions.set(key, scroller.scrollTop);
+    const onScroll = save;
     scroller.addEventListener('scroll', onScroll, { passive: true });
     return () => {
+      save();
       window.clearTimeout(timer);
       scroller.removeEventListener('scroll', onScroll);
     };

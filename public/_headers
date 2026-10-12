@@ -1,0 +1,35 @@
+# Cloudflare Pages 响应头。放在 public/ 下，Vite 会原样拷进 dist/，Pages 部署时读取。
+# 语法：路径行顶格，头字段缩进两格；匹配按路径，忽略 query string。
+#
+# 内容指纹策略：
+# - dist/assets/* 由 Vite 打上内容 hash；
+# - public/ 下的位图路径不变，靠 `src/lib/publicAsset.ts` 的 PUBLIC_ASSET_CACHE_KEY 挂
+#   `?v=`，换图必 bump。
+# 两者都能保证「内容变了 URL 一定变」，所以对它们上 immutable 是安全的。
+#
+# 反过来，index.html / manifest 的 URL 永远不变，一旦被长缓存，同事的手机就再也刷不到
+# 新版本了 —— 这两类必须每次回源校验。
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/videos/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate

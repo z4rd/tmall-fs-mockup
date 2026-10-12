@@ -27,6 +27,51 @@ body {
   overscroll-behavior: none;
 }
 
+/*
+ * 全库唯一的「真机 / 桌面外框」断点，与 ScaleViewport 的 useFramed()
+ * （min-width: 560px）严格互补。两件事都收在这一个块里，方便一次审完。
+ */
+@media (max-width: 559.98px) {
+  :root[data-mobile-chrome-tone='dark'] {
+    --mobile-chrome-bg: var(--mobile-chrome-dark-bg);
+  }
+
+  :root[data-mobile-chrome-tone='light'] {
+    --mobile-chrome-bg: #FEFEFE;
+  }
+
+  :root[data-mobile-chrome-tone='product-wall'] {
+    --mobile-chrome-bg: var(--mobile-chrome-product-wall-bg);
+  }
+
+  html,
+  body {
+    /*
+     * 微信 / Safari 底部地址栏会取 document canvas 背景色；这里必须固定为
+     * #FEFEFE，不能再跟随页面 tone，否则产品墙等深/彩色页会把地址栏一起染色。
+     * 顶部 status bar 另由 `theme-color` 与 `ScaleViewport.css` 的安全区填充
+     * 尽量跟随 `data-mobile-chrome-tone`。
+     */
+    background: #FEFEFE;
+  }
+
+  /*
+   * 真机上系统已经画了状态栏，母版那条就不再渲染，整幅设计画布同步上移
+   * `--sb-drop`（取值与用法见 `tokens.css`）。
+   *
+   * 这条 `display: none` 只管「别念给读屏、别留死 DOM」：`.cs-status` 在 `.cs` /
+   * `.gcs` 内部是随流元素，而搜索行是 `inset: 0` 的绝对层，所以隐不隐藏都不影响
+   * 任何一个坐标 —— 真正把它挪出视口的是 header 自身的 `top: calc(-1 * var(--sb-drop))`。
+   */
+  :root {
+    --sb-drop: var(--status-bar-height);
+  }
+
+  .cs-status {
+    display: none;
+  }
+}
+
 button {
   appearance: none;
   border: 0;

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Gender } from '../../data/floors';
+import { LOOKBOOK_SKU_VIDEOS } from '../../data/lookbookSkuVideos';
 import { HOME_VIDEOS } from '../../data/videos';
 import { publicAsset } from '../../lib/publicAsset';
 import { autoplayInWeixin } from '../../lib/weixinVideoAutoplay';
 import { u } from '../../lib/u';
 import { SectionHeader } from '../common/SectionHeader';
+import { ResponsiveImage } from '../media/ResponsiveImage';
 import './LookbookGridFloor.css';
 
 const CELL_W = [118, 119, 118];
@@ -60,17 +62,27 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
   const [leaving, setLeaving] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const savedTime = useRef(0);
+  const lastVideoSrc = useRef<string | null>(null);
   const collapseTimer = useRef<number | null>(null);
 
   const expanded = expandedIndex !== null;
-  const videoSrc = gender === 'men' ? HOME_VIDEOS.lookbookMen : HOME_VIDEOS.lookbookWomen;
+  const skuVideos = LOOKBOOK_SKU_VIDEOS[gender];
+  const skuVideoByCell = new Map(skuVideos.map((item) => [item.cell, item]));
+  const activeSkuVideo = expandedIndex !== null ? skuVideoByCell.get(expandedIndex) : undefined;
+  const videoSrc = activeSkuVideo?.video ?? (gender === 'men' ? HOME_VIDEOS.lookbookMen : HOME_VIDEOS.lookbookWomen);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !expanded || leaving) return;
-    video.currentTime = savedTime.current;
+    const sourceChanged = lastVideoSrc.current !== videoSrc;
+    lastVideoSrc.current = videoSrc;
+    if (sourceChanged) {
+      savedTime.current = 0;
+      video.load();
+    }
+    video.currentTime = sourceChanged ? 0 : savedTime.current;
     autoplayInWeixin(video);
-  }, [expanded, leaving, gender]);
+  }, [expanded, leaving, gender, videoSrc]);
 
   useEffect(() => {
     return () => {
@@ -145,13 +157,7 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
             onClick={() => !expanded && openCell(index)}
             aria-label="展开夏日穿搭"
           >
-            {!active ? (
-              <img
-                src={publicAsset(`images/live/lookbook/${gender}/${index}.webp`)}
-                alt=""
-                draggable={false}
-              />
-            ) : null}
+            {!active ? <LookbookThumbMedia gender={gender} index={index} skuVideo={skuVideoByCell.get(index)} /> : null}
           </button>
         );
       })}
@@ -168,6 +174,7 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
             }}
           >
             <video
+              key={videoSrc}
               ref={videoRef}
               className="lookbook-slot__video"
               src={publicAsset(videoSrc)}
@@ -192,13 +199,15 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
             <span className="lookbook-back__label">返回</span>
           </button>
           <div className={`lookbook-rail${leaving ? ' lookbook-rail--out' : ''}`}>
+            {/* 右侧 PDP 组件保持原静态商品卡；SKU 视频只替换未展开小图和左侧大图。 */}
             {[0, 1, 2].map((card) => (
-              <img
-                key={card}
-                className="lookbook-rail__card"
-                src={publicAsset(`images/live/lookbook/${gender}/rail-${card}.webp`)}
-                alt=""
-              />
+              <span key={card} className="lookbook-rail__item">
+                <img
+                  className="lookbook-rail__card"
+                  src={publicAsset(`images/live/lookbook/${gender}/rail-${card}.webp`)}
+                  alt=""
+                />
+              </span>
             ))}
           </div>
           <div className={`lookbook-thumbs${leaving ? ' lookbook-thumbs--out' : ''}`}>
@@ -214,11 +223,7 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
                   aria-label={`穿搭 ${cell + 1}`}
                   aria-current={cell === expandedIndex}
                 >
-                  <img
-                    src={publicAsset(`images/live/lookbook/${gender}/${cell}.webp`)}
-                    alt=""
-                    draggable={false}
-                  />
+                  <LookbookThumbMedia gender={gender} index={cell} skuVideo={skuVideoByCell.get(cell)} />
                 </button>
               ))}
             </div>
@@ -227,5 +232,44 @@ export function LookbookGridFloor({ gender, height }: LookbookGridFloorProps) {
         </>
       ) : null}
     </section>
+  );
+}
+
+function LookbookThumbMedia({
+  gender,
+  index,
+  skuVideo,
+}: {
+  gender: Gender;
+  index: number;
+  skuVideo?: { sku: string; video: string };
+}) {
+  if (skuVideo) {
+    return (
+      <video
+        className="lookbook-thumb-video"
+        src={publicAsset(skuVideo.video)}
+        muted
+        loop
+        autoPlay
+        playsInline
+        preload="metadata"
+        aria-label={skuVideo.sku}
+        {...({
+          'webkit-playsinline': 'true',
+          'x5-playsinline': 'true',
+          'x5-video-player-type': 'h5',
+          'x5-video-player-fullscreen': 'false',
+        } as Record<string, string>)}
+      />
+    );
+  }
+
+  return (
+    <ResponsiveImage
+      src={publicAsset(`images/live/lookbook/${gender}/${index}.webp`)}
+      alt=""
+      draggable={false}
+    />
   );
 }

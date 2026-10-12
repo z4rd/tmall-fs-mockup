@@ -1,0 +1,11 @@
+/*
+ * `display: contents` 让 `<picture>` 自己不生成盒子，子 `<img>` 直接参与父级布局 ——
+ * 于是「给既有 `<img>` 套一层 picture 做 AVIF 回退」这件事不需要改任何一条已有 CSS 规则，
+ * 绝对定位、flex 子项、负 margin 全都照旧。
+ *
+ * 支持度：Safari 11.1+ / Chrome 65+ / Firefox 37+，覆盖面比 AVIF 本身宽得多，
+ * 所以不存在「能解 AVIF 却不认 display: contents」的组合。
+ */
+.rimg {
+  display: contents;
+}

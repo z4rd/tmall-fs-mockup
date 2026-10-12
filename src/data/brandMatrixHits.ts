@@ -27,6 +27,16 @@ const ACG_BRAND_MATRIX_ROWS: BrandMatrixHit[] = [
   { target: 'kids', top: 72 + ROW_STEP * 2, height: ROW_H },
 ];
 
+/**
+ * ACG 新版首页把底部「官方店铺」并进了 `grid-2 / Total Look` 的可见溢出长图。
+ * 坐标相对 `4138:3808`：溢出组 `4136:3163` y=-666，Doorway y=4603，列表自 y72。
+ */
+const ACG_GRID2_STORE_ROWS: BrandMatrixHit[] = [
+  { target: 'nike-men', top: 4009, height: ROW_H },
+  { target: 'jordan', top: 4009 + ROW_STEP, height: ROW_H },
+  { target: 'kids', top: 4009 + ROW_STEP * 2, height: ROW_H },
+];
+
 /** Jordan `brand-matrix` `2472:16274`，列表自 y36。 */
 const JORDAN_BRAND_MATRIX_ROWS: BrandMatrixHit[] = [
   { target: 'nike-men', top: 36, height: ROW_H },
@@ -62,6 +72,7 @@ export function brandMatrixHitsFor(
   variant: FloorAssetVariant,
   floorKey: string,
 ): BrandMatrixHit[] | null {
+  if (variant === 'acg' && floorKey === 'grid-2') return ACG_GRID2_STORE_ROWS;
   if (floorKey !== 'store-navigation' && floorKey !== 'brand-matrix') return null;
 
   if (floorKey === 'brand-matrix') {

@@ -4,7 +4,9 @@
 .page-back-chrome {
   position: absolute;
   z-index: 45;
-  top: 52px;
+  /* 52 是含状态栏的母版坐标，真机下线假状态栏后上移 `--sb-drop`。
+     PostCSS 会把里面的 52px 改写成 calc(52 * var(--u))，嵌套 calc 合法。 */
+  top: calc(52px - var(--sb-drop));
   left: 0;
   display: block;
   line-height: 0;

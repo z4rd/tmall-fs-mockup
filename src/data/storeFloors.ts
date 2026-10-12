@@ -1,30 +1,27 @@
 import type { Floor } from './floors';
 
-/**
- * ACG 首页 `2553:71355`，楼层间距 8（§2.10）。
- *
- * 没有 closing 层，这是设计稿本身的结论而不是遗漏：`2553:71883` 虽然声明 375×729，
- * 但把它单独隔离渲染（不受父容器裁剪影响）得到的也只有 375×6 —— 这一层本身就是空的，
- * 里面那张 `Image` 基本无内容。按节点导出得到的 `closing.png` 因此只有 1125×19，
- * 铺进 729 高的楼层被 `object-fit: cover` 放大约 115 倍，就是一片渐变空白。
- * 它挂在内容容器 `2553:71356`（自身高 6889、裁剪子层）的 y6889.015 上，压在边界外，
- * 像是随手丢在末尾的废弃帧。要重新评估时先看隔离渲染尺寸，别只看声明高度。
- * 末层是 `brand-matrix`（品牌矩阵 / 官方店铺），其底边 6838 距容器底 6889 的 51px 由
- * `.store-home__main` 的 padding-bottom 承担。
- */
+/** ACG 首页 `2553:71355` / 内容帧 `4138:3243`，楼层间距 8（§2.10）。 */
 export const ACG_FLOORS: Floor[] = [
-  { key: 'hero', title: '', height: 530 },
+  { key: 'hero', title: '', height: 522 },
   { key: 'doorway-4', title: '', height: 120 },
-  { key: 'new-arrivals-1', title: '当季主推', height: 650 },
-  { key: 'sports-zone-a', title: '运动专区', height: 732 },
-  { key: 'sports-zone-b', title: '运动专区', height: 776 },
-  { key: 'story-kdoy', title: '', height: 539 },
-  { key: 'grid-1', title: '', height: 820 },
-  { key: 'banner-cdp', title: '', height: 833 },
-  { key: 'grid-2', title: '', height: 820 },
-  { key: 'new-arrivals-2', title: '', height: 586 },
-  { key: 'brand-matrix', title: '品牌矩阵', height: 348 },
+  { key: 'new-arrivals-1', title: '当季主推', height: 612 },
+  { key: 'membership', title: '耐克会员专享', height: 222 },
+  { key: 'sports-zone-a', title: '', height: 643 },
+  { key: 'sports-zone-b', title: '', height: 751 },
+  { key: 'grid-1', title: '', height: 664 },
+  { key: 'grid-2', title: '', height: 4951 },
 ];
+
+export const ACG_FLOOR_GAP_BEFORE: Record<string, number> = {
+  hero: 0,
+  'doorway-4': 8,
+  'new-arrivals-1': 8,
+  membership: 20,
+  'sports-zone-a': 20,
+  'sports-zone-b': 0,
+  'grid-1': 0,
+  'grid-2': 0,
+};
 
 /**
  * Jordan 首页 `2472:16099`，楼层间距 24。
@@ -42,7 +39,7 @@ export const JORDAN_FLOORS: Floor[] = [
   { key: 'p1', title: '', height: 613 },
   { key: 'launch-calendar', title: '尖货日历', height: 422 },
   { key: 'new-shoes', title: '新鞋亮点', height: 462 },
-  { key: 'membership', title: '会员', height: 130 },
+  { key: 'membership', title: '耐克会员专享', height: 222 },
   { key: 'aj1', title: 'Air Jordan 1', height: 448 },
   { key: 'aj-line', title: '正代系列', height: 360 },
   { key: 'ranking', title: '热销鞋榜', height: 538 },
@@ -72,7 +69,7 @@ export const KIDS_FLOORS: Floor[] = [
   { key: 'p1-story', title: '', height: 533 },
   { key: 'new-product', title: '新货上架', height: 758 },
   { key: 'seasonal-picks', title: '夏日趣玩不设限', height: 545 },
-  { key: 'membership', title: '耐克会员专享', height: 136 },
+  { key: 'membership', title: '耐克会员专享', height: 222 },
   { key: 'sports-shelf', title: '为体育课选购', height: 540 },
   { key: 'ranking', title: '夏日大童热销榜', height: 642 },
   { key: 'lookbook-grid', title: '夏日运动潮搭', height: 404 },
@@ -84,7 +81,7 @@ export const KIDS_FLOORS: Floor[] = [
   { key: 'store-navigation', title: '品牌矩阵', height: 320 },
 ];
 
-export const STORE_FLOOR_GAP = { acg: 8, jordan: 24, kids: 40 } as const;
+export const STORE_FLOOR_GAP = { acg: 0, jordan: 24, kids: 40 } as const;
 
 export type StoreVariant = 'acg' | 'jordan' | 'kids';
 

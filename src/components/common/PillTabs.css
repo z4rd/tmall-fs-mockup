@@ -102,6 +102,7 @@
 }
 
 .pill-tabs--bubble .pill-tabs__track {
+  isolation: isolate;
   /*
    * 轨道是 flex item，默认 flex-shrink:1 会把显式宽度（七个 tab 共 524）压回容器宽（337），
    * 于是 scrollWidth == clientWidth、横向滚不动。子项全是绝对定位、min-content 为 0，
@@ -112,6 +113,17 @@
 }
 
 .pill-tabs--bubble .pill-tabs__item {
+  /*
+   * 必须显式给 z-index，不能靠「都是 z-index:auto 的定位元素、按 DOM 顺序后来居上」。
+   * 选中胶囊 `.pill-tabs__active--skin` 是 DOM 里的第一个子节点、z-index:0，显式把按钮
+   * 抬到严格更高的一档，绘制顺序就不留给引擎自由发挥。
+   *
+   * 背景：胶囊原本带 backdrop-filter，会被提升成独立合成层，Safari 上把整块胶囊盖到了
+   * 标签上 —— 用户实拍到胶囊是一块纯深红、拉伸对比度后能看到被 blur(6px) 糊开的白字残影
+   * （标签成了胶囊 backdrop 的一部分，先被模糊、再被暗玻璃洗掉）。现已移除 backdrop-filter
+   * 根除合成层，见下方 `--skin` 处的说明。对照图 agent-runs/2026-09-22-pill-label-fix/。
+   */
+  z-index: 2;
   top: 0;
   height: 32px;
   padding: 0;
@@ -142,10 +154,13 @@
 }
 
 .pill-tabs--bubble .pill-tabs__label {
+  z-index: 3;
   font-family: inherit;
   font-size: inherit;
   font-weight: inherit;
   line-height: inherit;
+  -webkit-text-fill-color: currentColor;
+  transform: translateZ(0);
 }
 
 .pill-tabs--bubble .pill-tabs__label--tight {
@@ -178,9 +193,11 @@
  * 这四层对应 Figma 组件参数里的 Opacity 25 / Frost 6 / Refraction / Depth / Splay /
  * Dispersion：Frost 是 backdrop 模糊；Refraction + Depth 在边缘把背景折射压暗，形成
  * 外轮廓和本体上部的下凹；Splay 把折射亮部甩到上下缘，就是那两条镜面亮线。
+ * 注意这是**对 Figma 参数的解读**，不是实现清单：Frost 那一项在 CSS 侧没有对应实现，
+ * 因为 tab 条底色是纯色、模糊对合成结果没有贡献（原因见下方 `--skin` 里那条禁令）。
  * 但**不**直译 Figma 的图层栈与 `mix-blend-mode`：上一轮已证实 Figma 渲染器的
- * plus-lighter / luminosity 与 CSS Compositing 规范不等价，且本元素带 z-index +
- * backdrop-filter，必然形成层叠上下文，`mix-blend-mode` 会被隔离。
+ * plus-lighter / luminosity 与 CSS Compositing 规范不等价，且本元素是带 z-index 的定位
+ * 元素、必然形成层叠上下文，`mix-blend-mode` 会被隔离。
  *
  * ── 参数从哪来（含色彩管理）─────────────────────────────────────────
  * 真值是屏幕截图，通道值在显示空间而非 sRGB：volt 面板读到 (221,251,60)，源色
@@ -206,14 +223,18 @@
  */
 .pill-tabs--bubble .pill-tabs__active--skin {
   position: absolute;
-  z-index: 0;
+  z-index: 1;
   top: 0;
+  left: 0;
   height: 32px;
   border-radius: 16px;
   pointer-events: none;
-  /* 七张稿的 tab 条底色都是纯色，模糊在那里不改变合成值；保留它是为了胶囊滑过非纯色区域时仍是玻璃。 */
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  /*
+   * 不要加回 backdrop-filter。它是本元素被提升成独立合成层的唯一原因，而 Safari 在
+   * 「合成层 vs 之后的非合成兄弟」这一档上判错、把整块胶囊盖到标签上（见 `__item` 处说明）。
+   * 移除的代价实测为零：七张稿的 tab 条底色本来就是纯色，模糊不改变合成结果 —— 关掉前后
+   * 14 组胶囊最大通道差 3/255、平均 0.14/255，是抗锯齿噪声量级。
+   */
   /*
    * 第 3 层：本体的浅 V。22%~30% 是最暗平台（三档真值的最暗点分别落在 24% / 27% / 19~26%，
    * 是个平台而不是单点），之后单调渐亮，最后 15% 加速 —— 下缘边缘光的辉光段。
@@ -233,8 +254,9 @@
     /* 第 2 层：上缘 1px 镜面高光 */ inset 0 1px 0 var(--pill-glass-spec),
     /* 第 4 层：下缘 1px 边缘光 */ inset 0 -1px 0 var(--pill-glass-edge),
     0 8px 15px var(--pill-glass-drop);
+  will-change: transform, width;
   transition:
-    left 300ms linear,
+    transform 300ms linear,
     width 300ms linear;
 }
 
@@ -284,20 +306,29 @@
 }
 
 /*
- * 叠黑：休闲穿搭 / ACG 户外。外投影比另两档重一倍，红 / 橙底上肉眼可见一圈暗缘。
- * 本体基色 a=.605、C 由 27 展开。ACG 实测把 C 轨迹反解出来是「最暗→下缘 +31」，
- * 与篮球档标定的 +43 同量级但略缓，所以这一档的 bottom 只推到 58 而不是按比例外推。
- * 暗轮廓环 .40 是从 ACG 未被裁剪的 G/B 通道反解的（44/110 = 25/62 = .40）。
+ * 叠黑：休闲穿搭 / ACG 户外。设计稿里这档不是纯中性黑，而是在红 / 橙底上透出一层
+ * 酒红高光：上缘要被明显提亮，中心仍压暗，外圈是一道清楚的暗轮廓再叠很薄的红色边缘光。
+ * 这里仍然只靠渐变 / box-shadow 模拟，不恢复 backdrop-filter，避免文字再次被合成层吞掉。
  */
 .pill-tabs--bubble .pill-tabs__active--skin[data-pill-glass='black'] {
-  --pill-glass-top: rgba(32, 32, 32, 0.605);
-  --pill-glass-dip: rgba(27, 27, 27, 0.605);
-  --pill-glass-mid: rgba(33, 33, 33, 0.605);
-  --pill-glass-low: rgba(44, 44, 44, 0.605);
-  --pill-glass-bottom: rgba(58, 58, 58, 0.605);
-  --pill-glass-rim: rgba(0, 0, 0, 0.4);
-  --pill-glass-spec: rgba(255, 255, 255, 0.19);
-  --pill-glass-edge: rgba(255, 255, 255, 0.13);
-  --pill-glass-drop: rgba(0, 0, 0, 0.04);
+  top: -1px;
+  height: 34px;
+  border-radius: 17px;
+  --pill-glass-top: rgba(92, 58, 72, 0.64);
+  --pill-glass-dip: rgba(20, 12, 38, 0.64);
+  --pill-glass-mid: rgba(31, 14, 42, 0.64);
+  --pill-glass-low: rgba(55, 22, 46, 0.64);
+  --pill-glass-bottom: rgba(82, 35, 55, 0.64);
+  --pill-glass-rim: rgba(0, 0, 0, 0.48);
+  --pill-glass-spec: rgba(255, 176, 184, 0.34);
+  --pill-glass-edge: rgba(255, 174, 178, 0.2);
+  --pill-glass-drop: rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 0 0 1px var(--pill-glass-rim),
+    0 0 0 2px rgba(255, 65, 88, 0.14),
+    inset 0 1px 0 var(--pill-glass-spec),
+    inset 0 -1px 0 var(--pill-glass-edge),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 7px 14px var(--pill-glass-drop);
 }
 

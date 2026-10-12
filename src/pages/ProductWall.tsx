@@ -52,7 +52,8 @@ export function ProductWall() {
         aria-label="返回"
         onClick={goBack}
         style={{
-          top: u(backTop),
+          // 热区跟着位图一起上移：位图顶部被裁掉 `--sb-drop`，烤死的 ← 也就上移了同样多。
+          top: `calc(${u(backTop)} - var(--sb-drop))`,
           left: u(backLeft),
           width: u(pw.w),
           height: u(pw.h),
@@ -63,6 +64,8 @@ export function ProductWall() {
           className="pw-img"
           src={src}
           alt={title}
+          decoding="async"
+          {...({ fetchpriority: 'high' } as Record<string, string>)}
           onError={(e) => {
             const img = e.currentTarget;
             img.style.display = 'none';

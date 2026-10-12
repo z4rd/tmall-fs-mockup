@@ -33,12 +33,12 @@ export function BottomNav() {
   if (!showsBottomNav(pathname)) return null;
 
   const store = storeIdFromPath(pathname);
-  const { items } = bottomNavVariant(store);
+  const { items, tone } = bottomNavVariant(store, pathname);
   const count = items.length;
   const activeKey = bottomNavActiveKey(items, pathname);
 
   return (
-    <nav className="bnav" data-store={store} aria-label="底部导航">
+    <nav className="bnav" data-store={tone ?? store} aria-label="底部导航">
       {/* 分隔线落在等分网格的格线上，不属于任何一项，单独绘制。 */}
       {navDividers(count).map((x) => (
         <span key={x} className="bnav-divider" style={{ left: u(x) }} aria-hidden="true" />

@@ -32,6 +32,9 @@
 
   /* 背景面（实测） */
   --surface-page: #f8f9fb;
+  --mobile-chrome-bg: #FEFEFE;
+  --mobile-chrome-dark-bg: #5f6062;
+  --mobile-chrome-product-wall-bg: #F4B37D;
   --surface-lookbook-panel: #e8e8e8;
   --surface-lookbook-strip: #ececea;
 
@@ -51,6 +54,22 @@
   --content-gutter: 6px;
   --floor-gap: 40px;
   --bottom-nav-height: 70px;
+
+  /*
+   * 设计稿母版顶部那条 iOS 状态栏（时间 / 5G / 电量）的高度。
+   *
+   * 桌面外框预览里没有系统状态栏，所以由 `chrome/StatusBar.tsx` 自己画一条，整幅
+   * 画布按母版坐标原样排布；真机浏览器里系统已经画了一条，再画就是两条上下叠着，
+   * 所以窄屏下把它下线，并把整幅设计画布上移同样的高度。
+   *
+   * **`--sb-drop` 是这次上移的唯一真相源。** 所有「从页顶算」的坐标一律写成
+   * `calc(<母版原值> - var(--sb-drop))`，母版量到的原值因此原样保留、可溯源，
+   * 两种形态只差这一个值。窄屏取值见 `global.css` 里那条 `max-width` 媒体查询 ——
+   * 断点与 ScaleViewport 的 useFramed()（min-width: 560px）严格互补，全库只此一处，
+   * 不要另引第二套判断条件。
+   */
+  --status-bar-height: 44px;
+  --sb-drop: 0px;
 
   /* 字体 */
   --font-latin: 'Helvetica Now Text', -apple-system, BlinkMacSystemFont, Helvetica, Arial,

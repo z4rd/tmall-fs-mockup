@@ -85,9 +85,15 @@ export function PillTabs({
     const btn = btnRefs.current[activeKey];
     const scroller = scrollerRef.current;
     if (!btn || !scroller) return;
-    const left = btn.offsetLeft - scroller.clientWidth / 2 + btn.clientWidth / 2;
-    scroller.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
-  }, [activeKey]);
+
+    const targetLeft = Math.max(0, btn.offsetLeft - scroller.clientWidth / 2 + btn.clientWidth / 2);
+    if (variant === 'bubble') {
+      scroller.scrollTo({ left: targetLeft, behavior: 'auto' });
+      return;
+    }
+
+    scroller.scrollTo({ left: targetLeft, behavior: 'smooth' });
+  }, [activeKey, variant]);
 
   // bubble 的选中胶囊走 left/width 过渡：layoutId 的 scale 动画会把圆角端帽拉变形。
   const positions: { left: number; width: number }[] = [];
@@ -117,7 +123,7 @@ export function PillTabs({
             // 档位之外的逐主题微调挂钩。当前三档都由通用规则覆盖，无逐主题特例（训练原来那条
             // 专属描边环已被结构式实现里的通用暗轮廓环取代），保留属性是为了调试与将来微调。
             data-pill-theme={activeKey}
-            style={{ left: u(activeBox.left), width: u(activeBox.width) }}
+            style={{ transform: `translate3d(${u(activeBox.left)}, 0, 0)`, width: u(activeBox.width) }}
           />
         ) : null}
         {items.map((item, i) => {

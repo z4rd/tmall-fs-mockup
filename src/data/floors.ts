@@ -19,7 +19,7 @@ export type Floor = {
 const MEN: Floor[] = [
   { key: 'p1-story', title: '', height: 552 },
   { key: 'sports-zone', title: '运动专区', height: 990 },
-  { key: 'membership', title: '耐克会员专享', height: 136 },
+  { key: 'membership', title: '耐克会员专享', height: 222 },
   { key: 'launch-calendar', title: '尖货日历', height: 403 },
   { key: 'new-product', title: '新货上架', height: 622 },
   { key: 'ranking', title: '热卖榜单', height: 642 },
@@ -39,7 +39,7 @@ const MEN: Floor[] = [
 const WOMEN: Floor[] = [
   { key: 'p1-story', title: '', height: 552 },
   { key: 'sports-zone', title: '运动专区', height: 990 },
-  { key: 'membership', title: '耐克会员专享', height: 136 },
+  { key: 'membership', title: '耐克会员专享', height: 222 },
   { key: 'launch-calendar', title: '尖货日历', height: 403 },
   { key: 'new-product', title: '新货上架', height: 622 },
   { key: 'lookbook-grid', title: '夏日穿搭', height: 580 },
@@ -57,7 +57,7 @@ const WOMEN: Floor[] = [
 /** Home - Commercial（`2728:67015`）13 层，高度量自报告 §2.6。 */
 const COMMERCIAL: Floor[] = [
   { key: 'p1-story', title: '', height: 650 },
-  { key: 'membership', title: '耐克会员专享', height: 238 },
+  { key: 'membership', title: '耐克会员专享', height: 222 },
   { key: 'flash-deals', title: '限时惊喜折扣', height: 722 },
   { key: 'ranking', title: '热卖榜单', height: 642 },
   { key: 'apparel', title: '必入服饰', height: 577 },

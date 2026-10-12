@@ -24,8 +24,8 @@ export type GoodsLandingDesign = {
    * 整页 @1x 高度；四店各不相同，切图实测值。
    *
    * 2026-09-22 设计改版并重导 @3x：四张根稿都在原来 815 高的底图下面又压了一层更长的
-   * 商品瀑布流。主店的页尾 70px 烤死导航由切图脚本裁掉；Jordan / ACG / Kids 改成设计侧
-   * 在 Figma 里手删那条 button nav、整帧入库（`--no-tail-crop`），整页高 977~1012 @1x。
+   * 商品瀑布流。四店现已统一由设计侧在 Figma 里手删那条 button nav、整帧入库
+   * （`--no-tail-crop`），整页高 977~1012 @1x；主店那条「裁底 70」的老流程已废弃。
    * 这个值要与 `public/images/goods/landing/<slug>.png` 的真实宽高比严格一致——
    * 位图本身是 `height: auto`，对不上整页纵向对位就会整体拉伸。
    *
@@ -100,7 +100,10 @@ export const GOODS_LANDING_DESIGNS: Record<StoreKey, GoodsLandingDesign> = {
     store: 'nike',
     figmaNode: '4040:24331',
     slug: 'nike',
-    height: 976,
+    // 2026-09-22 二次重导：设计侧在 Figma 里手删 button nav 后整帧变 1125×2940 @3x。
+    // 与 ACG / Kids 不同，这张的画板高度跟着收干净了，页尾商品图一直铺到帧底边
+    // （`measure_tail.py` 实测死区 0），所以不需要 `bottomClipPx`。
+    height: 980,
     indexTabRowTop: 223,
     indexTabs: [
       { key: 'goods', label: '宝贝' },

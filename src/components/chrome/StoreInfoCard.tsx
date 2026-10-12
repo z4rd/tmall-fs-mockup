@@ -13,6 +13,17 @@ import stars from '../../assets/icons/stars.png';
 import './StoreInfoCard.css';
 
 /** 三条店铺数据，向左无限循环（§6.6）。逐店文案见 `data/storeIdentity.ts`。 */
+function MetricChipText({ text }: { text: string }) {
+  const match = /^([0-9]+(?:\.[0-9]+)?(?:万|千)?)(.*)$/.exec(text);
+  if (!match) return <span className="sc-chip-text">{text}</span>;
+  return (
+    <span className="sc-chip-text">
+      <span className="sc-chip-number">{match[1]}</span>
+      <span className="sc-chip-label">{match[2]}</span>
+    </span>
+  );
+}
+
 function Chips({ chips }: { chips: readonly StoreChip[] }) {
   return (
     <>
@@ -32,7 +43,7 @@ function Chips({ chips }: { chips: readonly StoreChip[] }) {
                 alt=""
                 aria-hidden="true"
               />
-              {d.text}
+              <MetricChipText text={d.text} />
             </>
           )}
         </span>

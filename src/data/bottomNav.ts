@@ -5,12 +5,12 @@ import { storeIdFromPath } from './searchKeywords';
 import { storeHomePath, type StoreKey } from './store';
 
 /**
- * 中间那一项的形态。四家店各不相同，ACG 干脆没有这一项（见 `BOTTOM_NAV_BY_STORE`）。
+ * 中间凸起项的形态。ACG / Kids 新版没有凸起项（见 `BOTTOM_NAV_BY_STORE`）。
  *
  * - `pill`：主店的橙色胶囊，渐变 + `NikeSwoosh` 矢量 + 文字，全 DOM。
  * - `art`：切图。`card` 给出时先画一张白色圆角卡再把切图叠上去（Jordan）。
  *
- * 四店的凸起图形横向中心实测都落在格心 ±0.5px 内，所以这里只记 `top` 与尺寸，
+ * 有凸起图形的变体横向中心实测都落在格心 ±0.5px 内，所以这里只记 `top` 与尺寸，
  * 横向一律居中，不再逐张存绝对 x。
  */
 export type BottomNavCenter =
@@ -47,6 +47,8 @@ export type BottomNavItem = {
 export type BottomNavVariant = {
   /** 该店导航条的 Figma 节点，改几何前先回这里核。 */
   figmaNode: string;
+  /** 视觉分支；主店双 11 与普通 Nike 用不同底栏。 */
+  tone?: StoreKey | 'commercial';
   items: readonly BottomNavItem[];
 };
 
@@ -62,20 +64,19 @@ export function showsBottomNav(pathname: string) {
  *
  * | 店 | 节点 | 画布 |
  * | --- | --- | --- |
- * | nike（男子 / 女子 / 双 11 共用） | `4001:19200` | 375×70 |
+ * | nike（男子 / 女子） | `4001:19200` | 375×70 |
+ * | commercial（双 11） | `4137:3740` | 375×70 |
  * | jordan | `4072:12158` | 375×70 |
- * | kids   | `4072:12157` | 375×**71** |
+ * | kids   | `4170:2232` | 375×70 |
  * | acg    | `4072:12159` | 375×**71** |
  *
  * 四个节点都是拍平的位图（设计师从真机整屏截图上裁的矩形），拿不到组件树，只能导 @3x
  * 后量像素。下列数值都是在 @3x 导出图上测量后除以 3 得到的，精度约 ±0.2 设计 px。
  *
- * ⚠️ kids / acg 的 71 是**裁剪取整**，不是真实差异：三张图内部几何完全对齐
- * （分隔线 x 84.2 / 152.9 / 221.6 / 290.4 逐条一致，凸起项顶边同为 y8.67），
- * 多出来的 1px 落在所有内容下方（kids / acg 的最低墨行分别在 y38.3 / y33.3，
- * 末尾 3 个 @3x 行是纯背景）。另有一条独立旁证：宝贝页 landing 与分类 sheet 共 25 张切图
- * 页尾都烤着同一条原生导航，四店**一律**占最后 70 设计 px 整（背景突变行严丝合缝落在
- * 210/211 @3x 的交界上）。因此条身高度四店统一按 70 走，
+ * ⚠️ ACG 的 71 是**裁剪取整**，不是真实差异：多出来的 1px 落在所有内容下方。
+ * 另有一条独立旁证：宝贝页 landing 与分类 sheet 共 25 张切图页尾都烤着同一条原生导航，
+ * 四店**一律**占最后 70 设计 px 整（背景突变行严丝合缝落在 210/211 @3x 的交界上）。
+ * 因此条身高度四店统一按 70 走，
  * `--bottom-nav-height` 与 `RouteMotion` 的占位块都不需要分店。
  *
  * ---
@@ -114,7 +115,7 @@ export function navDividers(count: number): number[] {
  * 「首页」四店同形，只有角标文案分两派：nike / acg 是「新风潮」，jordan / kids 是「狂暑季」。
  * 这条是导出 @3x 放大 5 倍逐字认出来的，四张稿的角标胶囊尺寸、位置、渐变完全一致，只换文字。
  */
-function home(badge: '新风潮' | '狂暑季'): BottomNavItem {
+function home(badge?: '新风潮' | '狂暑季'): BottomNavItem {
   return {
     key: 'home',
     label: '首页',
@@ -171,24 +172,9 @@ export const BOTTOM_NAV_BY_STORE: Record<StoreKey, BottomNavVariant> = {
     ],
   },
   kids: {
-    figmaNode: '4072:12157',
-    items: [
-      home('狂暑季'),
-      GOODS,
-      {
-        key: 'sports',
-        label: '足球主场',
-        dead: true,
-        center: {
-          kind: 'art',
-          src: publicAsset('images/chrome/bottom-nav/kids-center.png'),
-          // volt 胶囊是一团带模糊辉光的渐变，足球是实拍球面，文字又压在辉光上——三者无法拆开，
-          // 只能整块出图。切图是不透明矩形，靠 Kids 条身底色恰好是平涂 #FCFCFC 才看不出接缝。
-          art: { top: 4, width: 66, height: 43 },
-        },
-      },
-      ...TAIL,
-    ],
+    figmaNode: '4170:2232',
+    // 2026-10-12 新版儿童底栏去掉「足球主场」凸起项，四项重新等分。
+    items: [home('新风潮'), GOODS, ...TAIL],
   },
   acg: {
     figmaNode: '4072:12159',
@@ -197,7 +183,30 @@ export const BOTTOM_NAV_BY_STORE: Record<StoreKey, BottomNavVariant> = {
   },
 };
 
-export function bottomNavVariant(store: StoreKey): BottomNavVariant {
+const COMMERCIAL_BOTTOM_NAV: BottomNavVariant = {
+  figmaNode: '4137:3740',
+  tone: 'commercial',
+  items: [
+    home(),
+    GOODS,
+    {
+      key: 'sports',
+      label: '足球主场',
+      dead: true,
+      center: {
+        kind: 'art',
+        src: publicAsset('images/chrome/bottom-nav/kids-center.png'),
+        art: { top: 4, width: 66, height: 43 },
+      },
+    },
+    ...TAIL,
+  ],
+};
+
+export function bottomNavVariant(store: StoreKey, pathname?: string): BottomNavVariant {
+  if (store === 'nike' && pathname && nikeVariantFromPath(pathname) === 'commercial') {
+    return COMMERCIAL_BOTTOM_NAV;
+  }
   return BOTTOM_NAV_BY_STORE[store];
 }
 
@@ -207,12 +216,15 @@ export function bottomNavVariant(store: StoreKey): BottomNavVariant {
  * 索引页六个入口里有三个落在主店，它们共用同一张宝贝页根稿 `4040:24331`，但左导航各不相同
  * （男子 13 项 / 女子 11 项 / 双 11 3 项），所以这个上下文必须一路带着走。
  */
-function nikeVariantFromPath(pathname: string): GoodsFamily {
+type NikeHomeVariant = Exclude<GoodsFamily, 'kids'>;
+
+function nikeVariantFromPath(pathname: string): NikeHomeVariant {
   if (pathname.startsWith('/home/women')) return 'women';
   if (pathname.startsWith('/home/commercial') || pathname.startsWith('/campaign/1111')) {
     return 'commercial';
   }
-  return goodsContextFromPath(pathname).family ?? 'men';
+  const family = goodsContextFromPath(pathname).family;
+  return family === 'women' || family === 'commercial' ? family : 'men';
 }
 
 /**

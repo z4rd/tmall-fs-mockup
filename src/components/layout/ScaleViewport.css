@@ -18,6 +18,21 @@
   background: var(--surface-page);
 }
 
+@media (max-width: 559.98px) {
+  /* 只补系统安全区那条背景，不参与命中测试，避免遮住页面顶部按钮。 */
+  :root:not([data-mobile-chrome-tone='light']) .sv-root[data-framed='false']::before {
+    content: '';
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--mobile-chrome-bg);
+    pointer-events: none;
+  }
+}
+
 .sv-root[data-framed='true'] {
   flex-direction: column;
   /* no-scale */

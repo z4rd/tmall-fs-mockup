@@ -8,7 +8,13 @@
     />
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta name="format-detection" content="telephone=no, email=no, address=no" />
-    <meta name="theme-color" content="#f8f9fb" />
+    <!--
+      默认浅色；运行时由 `MobileChromeTone` 按路由与顶栏折叠态动态切换。
+      iOS Safari 标签页主要看文档 canvas 背景色，这里用于 Android Chrome 与 standalone。
+    -->
+    <meta name="theme-color" content="#FEFEFE" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FEFEFE" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#FEFEFE" />
     <!--
       「添加到主屏幕」后以 standalone / fullscreen 启动，这是隐藏地址栏的唯一途径：
       普通浏览器标签页里 iOS Safari 与 Android Chrome 都不允许隐藏地址栏。

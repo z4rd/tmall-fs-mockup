@@ -28,27 +28,27 @@
     },
     "sheets/kids--big--weekly.png": {
       "kind": "sheet",
-      "height": 2970,
+      "height": 4503,
       "width": 1125
     },
     "sheets/kids--big--boys-shoes.png": {
       "kind": "sheet",
-      "height": 2556,
+      "height": 2313,
       "width": 1125
     },
     "sheets/kids--big--boys-apparel.png": {
       "kind": "sheet",
-      "height": 2802,
+      "height": 2592,
       "width": 1125
     },
     "sheets/kids--big--running.png": {
       "kind": "sheet",
-      "height": 3063,
+      "height": 2712,
       "width": 1125
     },
     "sheets/kids--big--other.png": {
       "kind": "sheet",
-      "height": 2115,
+      "height": 1905,
       "width": 1125
     },
     "sheets/kids--little--weekly.png": {
@@ -73,17 +73,67 @@
     },
     "sheets/jordan--men.png": {
       "kind": "sheet",
-      "height": 2691,
+      "height": 2370,
       "width": 1125
     },
     "sheets/jordan--classic.png": {
       "kind": "sheet",
-      "height": 2481,
+      "height": 2136,
       "width": 1125
     },
     "sheets/jordan--basketball.png": {
       "kind": "sheet",
-      "height": 2808,
+      "height": 2589,
+      "width": 1125
+    },
+    "landing/nike.png": {
+      "kind": "landing",
+      "height": 2940,
+      "width": 1125
+    },
+    "sheets/nike--men--new.png": {
+      "kind": "sheet",
+      "height": 4785,
+      "width": 1125
+    },
+    "sheets/nike--men--shoes.png": {
+      "kind": "sheet",
+      "height": 5034,
+      "width": 1125
+    },
+    "sheets/nike--men--running.png": {
+      "kind": "sheet",
+      "height": 8283,
+      "width": 1125
+    },
+    "sheets/nike--women--new.png": {
+      "kind": "sheet",
+      "height": 4785,
+      "width": 1125
+    },
+    "sheets/nike--women--shoes.png": {
+      "kind": "sheet",
+      "height": 5466,
+      "width": 1125
+    },
+    "sheets/nike--women--lifestyle.png": {
+      "kind": "sheet",
+      "height": 7200,
+      "width": 1125
+    },
+    "sheets/nike--commercial--all.png": {
+      "kind": "sheet",
+      "height": 3630,
+      "width": 1125
+    },
+    "sheets/nike--commercial--men.png": {
+      "kind": "sheet",
+      "height": 2232,
+      "width": 1125
+    },
+    "sheets/nike--kids--new.png": {
+      "kind": "sheet",
+      "height": 5307,
       "width": 1125
     }
   }

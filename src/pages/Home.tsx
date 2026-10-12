@@ -31,12 +31,13 @@ export function Home({ variant }: { variant: HomeVariant }) {
 
   return (
     <div className="home">
-      <div style={{ height: u(CARD_Y) }} aria-hidden="true" />
+      {/* 店铺卡之上的留白 = 母版的 CARD_Y，真机下线假状态栏后整体上移 `--sb-drop`。 */}
+      <div style={{ height: `calc(${u(CARD_Y)} - var(--sb-drop))` }} aria-hidden="true" />
 
       <StoreInfoCard />
 
       <div className="home-main">
-        {FLOORS[variant].map((floor) => {
+        {FLOORS[variant].map((floor, index) => {
           const kind = floorRenderKind(variant, floor);
 
           if (kind === 'tier-a-sports' && gender) {
@@ -53,6 +54,7 @@ export function Home({ variant }: { variant: HomeVariant }) {
               floor={floor}
               variant={variant}
               clickable={clickable}
+              priority={index === 0}
             />
           );
         })}

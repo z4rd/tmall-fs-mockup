@@ -11,7 +11,9 @@ import {
   sportsThemesFor,
 } from '../../data/sportsThemes';
 import { publicAsset } from '../../lib/publicAsset';
+import { preloadImage } from '../../lib/preloadAssets';
 import { PillTabs } from '../common/PillTabs';
+import { ResponsiveImage } from '../media/ResponsiveImage';
 import { SectionHeader } from '../common/SectionHeader';
 import { u } from '../../lib/u';
 import './SportsZoneFloor.css';
@@ -50,15 +52,16 @@ export function SportsZoneFloor({ gender, height }: SportsZoneFloorProps) {
   const activePillGlass = useMemo(() => sportsTabPillGlassFor(activeKey), [activeKey]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    for (const theme of themes) {
+      preloadImage(publicAsset(`images/live/sports/${gender}/${theme.key}.webp`));
+    }
+  }, [gender, themes]);
+
   /*
    * ── 叠放 + 交叉淡入淡出的挂载策略 ─────────────────────────────────────
-   * 面板切图每张 1.2~2MB，七张合计约 10MB。改成叠放后若把七页一次性渲染出来，首屏就会
-   * 并发下载这十兆 —— 原来的 translateX 版本正是如此（七个 `<img>` 全在 DOM 里）。
-   * 所以只挂载**访问过的主题**：首屏只挂 1 张，切到哪张才挂哪张。
-   *
-   * 代价是首次切到某主题要等它下载完。为了不把横滑手势的手感做没，等当前这张 load 完
-   * 之后再把**左右邻居**补挂进来预热 —— 预热发生在当前页就绪之后，不和首屏抢带宽。
-   * 于是稳态最多常驻 3 张（首尾主题只有一个邻居，是 2 张），而不是 7 张。
+   * 首屏仍只挂默认主题；默认图就绪后再把所有主题补挂到 DOM 中预热。
+   * 这样首次点到后排 tab 时通常已经完成下载/解码，切换只改可见层，避免一帧空白或抖动。
    *
    * gender 变化时这几份状态不会变脏：/home/men 与 /home/women 是两条独立路由，
    * 切性别会整棵重挂，useState 的初值因此总是对的。
@@ -90,11 +93,11 @@ export function SportsZoneFloor({ gender, height }: SportsZoneFloorProps) {
 
   useEffect(() => {
     if (!activeReady) return;
-    const prev = themes[index - 1];
-    const next = themes[index + 1];
-    if (prev) ensureMounted(prev.key);
-    if (next) ensureMounted(next.key);
-  }, [activeReady, ensureMounted, index, themes]);
+    setMounted((prev) => {
+      const allKeys = themes.map((theme) => theme.key);
+      return allKeys.every((key) => prev.includes(key)) ? prev : allKeys;
+    });
+  }, [activeReady, themes]);
 
   const goPrev = useCallback(() => {
     const prev = themes[Math.max(0, index - 1)];
@@ -140,10 +143,11 @@ export function SportsZoneFloor({ gender, height }: SportsZoneFloorProps) {
                 {missing[theme.key] ? (
                   <div className="sports-zone__fallback">{theme.label}</div>
                 ) : (
-                  <img
+                  <ResponsiveImage
                     className="sports-zone__shot"
                     src={publicAsset(`images/live/sports/${gender}/${theme.key}.webp`)}
                     alt=""
+                    decoding="async"
                     draggable={false}
                     onLoad={() => setLoaded((prev) => ({ ...prev, [theme.key]: true }))}
                     onError={() => setMissing((prev) => ({ ...prev, [theme.key]: true }))}

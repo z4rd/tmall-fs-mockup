@@ -1,6 +1,6 @@
 import type { StoreKey } from './store';
 
-export type GoodsFamily = 'men' | 'women' | 'commercial';
+export type GoodsFamily = 'men' | 'women' | 'kids' | 'commercial';
 
 /** Kids 一级 tab（大童 / 幼童 / 婴童），与主店 `GoodsFamily` 同层级深度，见 §2.7.1。 */
 export type KidsFamily = 'big' | 'little' | 'baby';
@@ -83,6 +83,14 @@ export const NIKE_CATEGORIES: Record<GoodsFamily, GoodsCategory[]> = {
     { key: 'basketball-football', label: '篮球足球' },
     { key: 'jordan', label: 'Jordan' },
   ],
+  kids: [
+    { key: 'new', label: '当季上新' },
+    { key: 'summer', label: '夏日专区' },
+    { key: 'shoes', label: '鞋类' },
+    { key: 'apparel', label: '服饰配件' },
+    { key: 'basketball', label: '篮球' },
+    { key: 'jordan', label: 'Jordan' },
+  ],
   // 双 11 `4012:15064`：左导航是折扣人群维，「限时 3 折 / 5 折 / 7 折」是页面内的卡片不是导航项。
   commercial: [
     { key: 'all', label: '全部折扣' },
@@ -94,6 +102,7 @@ export const NIKE_CATEGORIES: Record<GoodsFamily, GoodsCategory[]> = {
 export const DEFAULT_CATEGORY: Record<GoodsFamily, string> = {
   men: 'new',
   women: 'new',
+  kids: 'new',
   commercial: 'all',
 };
 
@@ -140,7 +149,7 @@ export const KIDS_CATEGORIES: Record<KidsFamily, GoodsCategory[]> = {
     { key: 'football', label: '足球' },
     { key: 'running', label: '跑步' },
     { key: 'basketball', label: '篮球' },
-    { key: 'other', label: '其他运动' },
+    { key: 'other', label: '更多活动' },
   ],
   little: [
     { key: 'weekly', label: '每周上新' },
@@ -180,14 +189,13 @@ export const DEFAULT_JORDAN_CATEGORY = 'featured';
  * 分类态右侧 sheet 列底部裁切（@1x）。
  *
  * 只能裁**右侧栏实测死区**（`x117..359` 列、方差阈值见 agent 脚本），不能按店取 max —
- * Jordan 四张 sheet 死区 104–129 不等，统一 130 会把「篮球服饰/装备」等底行切掉。
- * 主店已由 `install_goods_png.py` 裁净，此处为 0。
+ * Jordan 四张 sheet 死区 34–104 不等，统一取最大会把「篮球服饰/装备」等底行切掉。
  */
 export const JORDAN_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
   featured: 104,
-  classic: 110,
-  basketball: 119,
-  men: 129,
+  classic: 35,
+  basketball: 34,
+  men: 36,
 };
 
 /**
@@ -205,17 +213,39 @@ export const ACG_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
 
 /**
  * Kids 七张 sheet 的死区，按 `<族>/<分类>` 索引 —— 三张 `weekly` 同名不同族，
- * 只看 category 会串门。`big/other` 的 473 不是异常：那张稿右侧只排到「网球 / 户外 / 其他」
+ * 只看 category 会串门。`big/other` 的 403 不是异常：那张稿右侧只排到「网球 / 户外 / 其他」
  * 一行，下面全是左导轨（活组件）对应的空白，右侧栏必须整段收掉。
  */
 export const KIDS_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
-  'big/weekly': 104,
-  'big/boys-shoes': 103,
-  'big/boys-apparel': 105,
-  'big/running': 103,
-  'big/other': 473,
-  'little/weekly': 104,
-  'baby/weekly': 105,
+  'big/weekly': 37,
+  'big/boys-shoes': 33,
+  'big/boys-apparel': 35,
+  'big/running': 32,
+  'big/other': 403,
+  'little/weekly': 105,
+  'baby/weekly': 106,
+};
+
+/**
+ * 主店八张 sheet 的死区，按 `<族>/<分类>` 索引 —— `men` 既是族名（男子）又是双 11 的分类名
+ * （男子折扣），只看 category 会串门。
+ *
+ * 2026-09-22 设计侧手删三个大店的 button nav 后重导实测，与 ACG / Kids 同一个毛病：
+ * nav 删了但**画板高度没跟着收**，页尾留下 103–123 的空白。原先注释里「主店已由
+ * `install_goods_png.py` 裁净」的说法只在裁底 70 的老流程下成立，现在走 `--no-tail-crop`，
+ * 裁切统一由这张表承担。
+ */
+export const NIKE_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
+  'men/new': 111,
+  'men/shoes': 123,
+  'men/running': 104,
+  'women/new': 111,
+  'women/shoes': 121,
+  'women/lifestyle': 104,
+  'kids/new': 103,
+  // commercial 新稿的 sheet 底部只带 71px 活底栏母版；旧值会多裁导航上方商品区。
+  'commercial/all': 71,
+  'commercial/men': 71,
 };
 
 export function goodsSheetBottomClipPx(
@@ -223,6 +253,9 @@ export function goodsSheetBottomClipPx(
   category: string,
   family?: string,
 ): number {
+  if (store === 'nike' && family) {
+    return NIKE_SHEET_BOTTOM_CLIP_PX[`${family}/${category}`] ?? 0;
+  }
   if (store === 'jordan') {
     return JORDAN_SHEET_BOTTOM_CLIP_PX[category] ?? 0;
   }
@@ -272,7 +305,9 @@ export function goodsTabsForFamily(family: GoodsFamily): StoreTabItem[] {
 }
 
 export function parseGoodsFamily(value: string | undefined): GoodsFamily | null {
-  if (value === 'men' || value === 'women' || value === 'commercial') return value;
+  if (value === 'men' || value === 'women' || value === 'kids' || value === 'commercial') {
+    return value;
+  }
   return null;
 }
 

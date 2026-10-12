@@ -12,7 +12,9 @@
 .cs {
   position: absolute;
   z-index: 40;
-  top: 0;
+  /* 真机下线假状态栏时整块头上移 `--sb-drop`。`.cs-searchrow` 是 `inset: 0` 的
+     绝对层，所以下面那一串 top（61 / 68 / 64 / 76 / 104）跟着走，一个都不用改。 */
+  top: calc(-1 * var(--sb-drop));
   right: 0;
   left: 0;
   height: calc((139 - 39 * var(--collapse, 0)) * var(--u));
@@ -37,6 +39,21 @@
     linear-gradient(168deg, #5d6062 0%, #63696c 52%, #6f7477 100%);
 }
 
+@media (max-width: 559.98px) {
+  :root[data-mobile-chrome-tone='dark'] .cs .cs-bg {
+    background:
+      linear-gradient(
+        180deg,
+        var(--mobile-chrome-dark-bg) 0,
+        var(--mobile-chrome-dark-bg) var(--status-bar-height),
+        rgb(95 96 98 / 0%) var(--status-bar-height)
+      ),
+      radial-gradient(120% 130% at 88% 12%, #9b6f6b 0%, rgb(155 111 107 / 0%) 58%),
+      radial-gradient(110% 120% at 6% 78%, #8d8487 0%, rgb(141 132 135 / 0%) 62%),
+      linear-gradient(168deg, #5d6062 0%, #63696c 52%, #6f7477 100%);
+  }
+}
+
 /* header 里唯一的硬切（§6.3）：渐变在 1 帧内变成纯白，所以这是状态翻转而不是
    插值过渡。 */
 :root[data-chrome-dark='false'] .cs .cs-bg {
@@ -53,7 +70,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 44px;
+  /* 与 `--sb-drop` 同源，免得两边各写一个 44 之后走散。 */
+  height: var(--status-bar-height);
   padding: 15px 20px 0 33px;
 }
 
@@ -218,10 +236,11 @@
   left: 275px;
   width: 54px;
   height: 29px;
-  border-radius: 100px;
-  background: rgb(255 255 255 / 26%);
-  color: inherit;
-  font-size: 12px;
+  border-radius: 4px;
+  background: #c9c9c9;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
   font-family: var(--font-cn);
   line-height: 29px;
   text-align: center;
@@ -238,8 +257,8 @@
 }
 
 :root[data-chrome-dark='false'] .cs .cs-follow {
-  background: var(--color-gray-300);
-  color: #6f6f72;
+  background: #c9c9c9;
+  color: #fff;
 }
 
 .cs-dots {

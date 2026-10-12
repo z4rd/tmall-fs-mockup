@@ -38,6 +38,11 @@ export function parseGoodsRoute(
     return { store: 'nike', view: 'browse', category: '' };
   }
 
+  if (seg1 === 'nike-kids') {
+    if (!seg2) return { store: 'nike', view: 'browse', family: 'kids', category: '' };
+    return { store: 'nike', view: 'category', family: 'kids', category: seg2 };
+  }
+
   if (isStoreKey(seg1)) {
     const store = seg1;
     if (store === 'nike') {
@@ -79,11 +84,13 @@ export function goodsPath(route: GoodsRoute): string {
     if (store !== 'nike') return `/goods/${store}`;
     // 主店三个入口共用同一张根稿，但「分类」要各回各族，所以除默认的男子外都在 URL 里留痕。
     const f = parseGoodsFamily(family);
+    if (f === 'kids') return '/goods/nike-kids';
     return f && f !== 'men' ? `/goods/${f}` : '/goods';
   }
 
   if (store === 'nike') {
     if (family && parseGoodsFamily(family)) {
+      if (family === 'kids') return `/goods/nike-kids/${category}`;
       return `/goods/${family}/${category}`;
     }
     return '/goods/men/new';

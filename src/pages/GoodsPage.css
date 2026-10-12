@@ -94,7 +94,12 @@
  */
 .goods-page__header2 {
   position: sticky;
-  top: 0;
+  /*
+   * 钉住点要跟着 `.gcs` 一起上移，否则真机下 `.gcs` 只剩 56 高，而 Header 2 仍钉在
+   * y0、高 102，就会有 46px 从白头下面探出来 —— 那是一条改动前没有的横条。
+   * 钉在 `-var(--sb-drop)` 时它继续藏在白头背后（两态都只露约 2px），行为不变。
+   */
+  top: calc(-1 * var(--sb-drop));
   z-index: 6;
   box-sizing: border-box;
   width: 100%;
