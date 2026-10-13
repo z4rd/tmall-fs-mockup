@@ -34,7 +34,7 @@ export function useCollapsibleHeader() {
 
     const apply = () => {
       frame = 0;
-      const { collapse, morph, dark } = headerState(scroller.scrollTop / u);
+      const { collapse, morph, dark } = headerState(scroller.getScrollTop() / u);
       el.style.setProperty('--collapse', collapse.toFixed(4));
       el.style.setProperty('--morph', morph.toFixed(4));
       // 写属性本身便宜，但会触发更大范围的失效，所以只在翻转的那一帧写。
@@ -54,11 +54,11 @@ export function useCollapsibleHeader() {
     };
 
     apply();
-    scroller.addEventListener('scroll', onScroll, { passive: true });
+    const removeScrollListener = scroller.addScrollListener(onScroll);
     window.addEventListener('resize', onResize);
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      scroller.removeEventListener('scroll', onScroll);
+      removeScrollListener();
       window.removeEventListener('resize', onResize);
     };
   }, [scroller]);

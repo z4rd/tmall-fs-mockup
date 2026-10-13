@@ -95,6 +95,27 @@
   height: 0;
 }
 
+:root[data-scroll-mode='window'] .sv-root[data-framed='false'] {
+  display: block;
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+}
+
+:root[data-scroll-mode='window'] .sv-root[data-framed='false'] .sv-stage {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+}
+
+:root[data-scroll-mode='window'] .sv-scroll {
+  position: relative;
+  inset: auto;
+  min-height: 100dvh;
+  overflow: visible;
+  overscroll-behavior-y: auto;
+}
+
 .sv-widths {
   display: flex;
   flex: none;

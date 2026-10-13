@@ -6,10 +6,10 @@ import { ROUTE_MOTION_MS } from './RouteMotion';
 const positions = new Map<string, number>();
 
 /**
- * 内部滚动容器的按路由滚动位置记忆。
+ * 按路由记忆滚动位置。
  *
  * 后退时恢复到离开时的位置，前进时从顶部开始。浏览器帮不了我们，因为滚动发生
- * 在一个 div 里而不是 window 上。
+ * 源可能是内部 div，也可能是移动端 window。
  */
 export function useScrollRestore() {
   const scroller = useScroller();
@@ -21,9 +21,9 @@ export function useScrollRestore() {
 
     const applyScroll = () => {
       if (navType === 'POP') {
-        scroller.scrollTop = positions.get(key) ?? 0;
+        scroller.setScrollTop(positions.get(key) ?? 0);
       } else {
-        scroller.scrollTop = 0;
+        scroller.setScrollTop(0);
       }
     };
 
@@ -32,13 +32,13 @@ export function useScrollRestore() {
     const timer = window.setTimeout(applyScroll, delay);
     if (delay === 0) applyScroll();
 
-    const save = () => positions.set(key, scroller.scrollTop);
+    const save = () => positions.set(key, scroller.getScrollTop());
     const onScroll = save;
-    scroller.addEventListener('scroll', onScroll, { passive: true });
+    const removeScrollListener = scroller.addScrollListener(onScroll);
     return () => {
       save();
       window.clearTimeout(timer);
-      scroller.removeEventListener('scroll', onScroll);
+      removeScrollListener();
     };
   }, [scroller, key, pathname, navType]);
 }

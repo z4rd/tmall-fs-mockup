@@ -17,6 +17,10 @@
   transition: opacity var(--press-dur) ease-out;
 }
 
+:root[data-scroll-mode='window'] .page-back-chrome {
+  position: fixed;
+}
+
 .page-back-chrome:active:not(:disabled) {
   opacity: var(--press-opacity);
 }

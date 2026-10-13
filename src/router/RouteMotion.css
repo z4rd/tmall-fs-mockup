@@ -7,6 +7,23 @@
   overflow: hidden;
 }
 
+:root[data-scroll-mode='window'] .route-motion-layer {
+  width: 100%;
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible;
+}
+
+:root[data-scroll-mode='window'] .route-motion-layer[data-active='true'] {
+  position: relative;
+  inset: auto;
+}
+
+:root[data-scroll-mode='window'] .route-motion-layer[data-active='false'] {
+  position: fixed;
+  overflow: hidden;
+}
+
 .route-motion-dim {
   position: absolute;
   z-index: 50;

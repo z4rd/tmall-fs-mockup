@@ -27,6 +27,17 @@ body {
   overscroll-behavior: none;
 }
 
+:root[data-scroll-mode='window'],
+:root[data-scroll-mode='window'] body,
+:root[data-scroll-mode='window'] #root {
+  height: auto;
+  min-height: 100%;
+}
+
+:root[data-scroll-mode='window'] body {
+  overscroll-behavior-y: auto;
+}
+
 /*
  * 全库唯一的「真机 / 桌面外框」断点，与 ScaleViewport 的 useFramed()
  * （min-width: 560px）严格互补。两件事都收在这一个块里，方便一次审完。

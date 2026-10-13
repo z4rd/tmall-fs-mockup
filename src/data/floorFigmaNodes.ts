@@ -36,27 +36,27 @@ export const WOMEN_FLOOR_FIGMA: Record<string, string> = {
   'store-navigation': '2685:60654',
 };
 
-/** FS - Commercial `2728:67015` → 13 个楼层子 frame（§2.6）。 */
+/** FS - Commercial `4141:7877` → 13 个楼层子 frame。 */
 export const COMMERCIAL_FLOOR_FIGMA: Record<string, string> = {
-  'p1-story': '2728:67022',
-  membership: '2728:67092',
-  'flash-deals': '2728:67133',
-  ranking: '2728:67200',
-  apparel: '2728:67281',
-  'discount-zones': '2728:67341',
-  'classic-footwear': '2728:67568',
-  'apparel-2': '2728:67628',
-  'seasonal-picks': '2728:67688',
-  'family-pack': '2728:67818',
-  'sports-zone': '2728:67874',
-  'product-navigation': '2728:67981',
-  'store-navigation': '2728:68063',
+  'p1-story': '4141:7885',
+  membership: '4141:8094',
+  'flash-deals': '4141:8199',
+  ranking: '4141:8349',
+  apparel: '4141:8469',
+  'discount-zones': '4141:8534',
+  'classic-footwear': '4141:8763',
+  'apparel-2': '4141:8826',
+  'family-pack': '4141:8889',
+  'seasonal-picks': '4141:8945',
+  'sports-zone': '4141:9100',
+  'product-navigation': '4141:9207',
+  'store-navigation': '4141:9289',
 };
 
 export const FLOOR_FIGMA_ROOT: Record<HomeVariant, string> = {
   men: '2692:61085',
   women: '2692:61087',
-  commercial: '2728:67015',
+  commercial: '4141:7877',
 };
 
 export function floorFigmaNode(variant: HomeVariant, floorKey: string): string | undefined {

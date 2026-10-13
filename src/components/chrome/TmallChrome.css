@@ -25,6 +25,10 @@
   contain: layout paint style;
 }
 
+:root[data-scroll-mode='window'] .cs {
+  position: fixed;
+}
+
 :root[data-chrome-dark='false'] .cs {
   color: var(--color-black);
 }

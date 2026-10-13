@@ -14,8 +14,9 @@
  * 2026-10-12：Kids 首页三年龄版本与 7 张宝贝分类 detail sheet 更新。
  * 2026-10-12：ACG 首页 grid-2 改为按可见溢出完整导出，修复尾部截断。
  * 2026-10-12：男子 / 女子夏日穿搭右侧 SKU 小卡接入 6 支动态视频。
+ * 2026-10-12：Commercial 首页从 Figma `4141:7877` 完整更新，修复尾部截断。
  */
-export const PUBLIC_ASSET_CACHE_KEY = '20261012-lookbook-sku-v1';
+export const PUBLIC_ASSET_CACHE_KEY = '20261012-commercial-home-v1';
 
 /** 相对 `public/` 的资源路径，配合 Vite `base: './'`，子目录托管也能打开。 */
 export function publicAsset(path: string): string {

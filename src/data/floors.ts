@@ -54,20 +54,19 @@ const WOMEN: Floor[] = [
   { key: 'store-navigation', title: '品牌矩阵', height: 320 },
 ];
 
-/** Home - Commercial（`2728:67015`）13 层，高度量自报告 §2.6。 */
+/** Home - Commercial（`4141:7877`）13 层，高度量自新版 Main。 */
 const COMMERCIAL: Floor[] = [
   { key: 'p1-story', title: '', height: 650 },
   { key: 'membership', title: '耐克会员专享', height: 222 },
-  { key: 'flash-deals', title: '限时惊喜折扣', height: 722 },
+  { key: 'flash-deals', title: '限时惊喜折扣', height: 654 },
   { key: 'ranking', title: '热卖榜单', height: 642 },
   { key: 'apparel', title: '必入服饰', height: 577 },
   { key: 'discount-zones', title: '折扣专区', height: 576 },
-  { key: 'classic-footwear', title: '经典鞋款', height: 545 },
-  { key: 'apparel-2', title: '必入服饰', height: 545 },
-  { key: 'seasonal-picks', title: '夏季精选', height: 610 },
+  { key: 'classic-footwear', title: '经典鞋款', height: 625 },
+  { key: 'apparel-2', title: '必入服饰', height: 625 },
   { key: 'family-pack', title: '儿童专区', height: 552 },
-  // 切图 `sportszone.png` @3x 2109 → 703 设计高；Figma 帧 `2728:67874` 声明 747，以实导为准。
-  { key: 'sports-zone', title: '运动专区', height: 703 },
+  { key: 'seasonal-picks', title: '夏季精选', height: 606 },
+  { key: 'sports-zone', title: '运动专区', height: 747 },
   { key: 'product-navigation', title: '商品导航', height: 514 },
   { key: 'store-navigation', title: '品牌矩阵', height: 320 },
 ];

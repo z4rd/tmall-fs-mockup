@@ -24,6 +24,13 @@ export function ScaleViewport({ children }: { children: ReactNode }) {
   const framed = useFramed();
   const [previewWidth, setPreviewWidth] = useState<number>(DESIGN_WIDTH);
 
+  useEffect(() => {
+    document.documentElement.dataset.scrollMode = framed ? 'element' : 'window';
+    return () => {
+      delete document.documentElement.dataset.scrollMode;
+    };
+  }, [framed]);
+
   // --u 是缩放的唯一来源：1 设计 px === 1 * var(--u)。
   //
   // 它必须挂在 :root 上，不能挂在 stage 上。自定义属性是在**声明处**做替换的，

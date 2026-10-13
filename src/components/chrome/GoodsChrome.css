@@ -32,6 +32,10 @@
   pointer-events: none;
 }
 
+:root[data-scroll-mode='window'] .gcs {
+  position: fixed;
+}
+
 .gcs .gcs-back,
 .gcs .gcs-follow,
 .gcs .gcs-dots {

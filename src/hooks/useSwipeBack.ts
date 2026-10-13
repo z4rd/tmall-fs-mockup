@@ -21,7 +21,7 @@ export function useSwipeBack() {
     const onStart = (e: TouchEvent) => {
       const t = e.touches.item(0);
       if (!t) return;
-      const rect = scroller.getBoundingClientRect();
+      const rect = scroller.element.getBoundingClientRect();
       const localX = t.clientX - rect.left;
       if (localX > EDGE_PX) return;
 
@@ -57,20 +57,21 @@ export function useSwipeBack() {
       tracking.current = false;
     };
 
-    scroller.addEventListener('touchstart', onStart, { passive: true });
-    scroller.addEventListener('touchmove', onMove, { passive: false });
-    scroller.addEventListener('touchend', onEnd, { passive: true });
-    scroller.addEventListener('touchcancel', onCancel, { passive: true });
+    const element = scroller.element;
+    element.addEventListener('touchstart', onStart, { passive: true });
+    element.addEventListener('touchmove', onMove, { passive: false });
+    element.addEventListener('touchend', onEnd, { passive: true });
+    element.addEventListener('touchcancel', onCancel, { passive: true });
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType === 'touch') return;
-      const rect = scroller.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
       const localX = e.clientX - rect.left;
       if (localX > EDGE_PX) return;
       tracking.current = true;
       startX.current = e.clientX;
       startY.current = e.clientY;
-      scroller.setPointerCapture(e.pointerId);
+      element.setPointerCapture(e.pointerId);
     };
 
     const onPointerUp = (e: PointerEvent) => {
@@ -80,28 +81,28 @@ export function useSwipeBack() {
       const dy = Math.abs(e.clientY - startY.current);
       if (dx >= TRIGGER_PX && dx > dy * 1.2) goBack();
       try {
-        scroller.releasePointerCapture(e.pointerId);
+        element.releasePointerCapture(e.pointerId);
       } catch {
         /* already released */
       }
     };
 
-    scroller.addEventListener('pointerdown', onPointerDown);
-    scroller.addEventListener('pointerup', onPointerUp);
+    element.addEventListener('pointerdown', onPointerDown);
+    element.addEventListener('pointerup', onPointerUp);
     const onPointerCancel = () => {
       tracking.current = false;
     };
 
-    scroller.addEventListener('pointercancel', onPointerCancel);
+    element.addEventListener('pointercancel', onPointerCancel);
 
     return () => {
-      scroller.removeEventListener('touchstart', onStart);
-      scroller.removeEventListener('touchmove', onMove);
-      scroller.removeEventListener('touchend', onEnd);
-      scroller.removeEventListener('touchcancel', onCancel);
-      scroller.removeEventListener('pointerdown', onPointerDown);
-      scroller.removeEventListener('pointerup', onPointerUp);
-      scroller.removeEventListener('pointercancel', onPointerCancel);
+      element.removeEventListener('touchstart', onStart);
+      element.removeEventListener('touchmove', onMove);
+      element.removeEventListener('touchend', onEnd);
+      element.removeEventListener('touchcancel', onCancel);
+      element.removeEventListener('pointerdown', onPointerDown);
+      element.removeEventListener('pointerup', onPointerUp);
+      element.removeEventListener('pointercancel', onPointerCancel);
     };
   }, [scroller, canBack, goBack]);
 }

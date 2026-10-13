@@ -1,7 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
-import { ScrollerProvider } from '../components/layout/ScrollerContext';
+import {
+  createElementScroller,
+  createWindowScroller,
+  ScrollerProvider,
+} from '../components/layout/ScrollerContext';
 import { BottomNav } from '../components/chrome/BottomNav';
 import { TmallChrome } from '../components/chrome/TmallChrome';
 import { GoodsChrome } from '../components/chrome/GoodsChrome';
@@ -83,11 +87,26 @@ function RouteShell({ location }: { location: ReturnType<typeof useLocation> }) 
   );
 }
 
-function RouteMotionPage({ dir }: { dir: Dir }) {
+function useWindowScrollMode() {
+  const [enabled, setEnabled] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 559.98px)').matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 559.98px)');
+    const onChange = () => setEnabled(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  return enabled;
+}
+
+function RouteMotionPage({ dir, windowScroll }: { dir: Dir; windowScroll: boolean }) {
   const live = useLocation();
   const [frozen] = useState(live);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [scroller, setScroller] = useState<HTMLElement | null>(null);
+  const [scroller, setScroller] = useState<ReturnType<typeof createElementScroller> | null>(null);
   /*
    * 「这一层还是不是当前层」必须按 **motion key** 判断，不能按 `location.key`。
    *
@@ -102,14 +121,17 @@ function RouteMotionPage({ dir }: { dir: Dir }) {
   const routeLocation = isActive ? live : frozen;
 
   useLayoutEffect(() => {
-    setScroller(scrollRef.current);
-  }, []);
+    const element = scrollRef.current;
+    if (!element) return;
+    setScroller(windowScroll ? createWindowScroller(element) : createElementScroller(element));
+  }, [windowScroll]);
 
   const transition = { duration: ROUTE_MOTION_MS / 1000, ease: ROUTE_MOTION_EASE };
 
   return (
     <motion.div
       className="route-motion-layer"
+      data-active={isActive}
       custom={dir}
       variants={layerVariants}
       initial="initial"
@@ -145,13 +167,14 @@ function RouteMotionPage({ dir }: { dir: Dir }) {
 export function RouteMotion() {
   const location = useLocation();
   const navType = useNavigationType();
+  const windowScroll = useWindowScrollMode();
   // 浏览器 POP 之外，站内 `goBack` 打的返回标记也算后退，见 `navDirection.ts`。
   const dir: Dir = routeDirection(location.key, navType);
   const motionKey = routeMotionKey(location.pathname);
 
   return (
     <AnimatePresence mode="sync" initial={false} custom={dir}>
-      <RouteMotionPage key={motionKey} dir={dir} />
+      <RouteMotionPage key={motionKey} dir={dir} windowScroll={windowScroll} />
     </AnimatePresence>
   );
 }
