@@ -58,7 +58,7 @@ const dimVariants = {
   exit: (dir: Dir) => ({ opacity: dir === 1 ? ROUTE_MOTION_DIM : 0 }),
 };
 
-function StageChrome() {
+function StageChrome({ showBottomNav = true }: { showBottomNav?: boolean }) {
   const { pathname } = useRouteLayerLocation();
   return (
     <>
@@ -69,7 +69,7 @@ function StageChrome() {
         ? <GoodsChrome storeId={storeIdFromPath(pathname)} />
         : null}
       <PageBackChrome />
-      <BottomNav />
+      {showBottomNav ? <BottomNav /> : null}
     </>
   );
 }
@@ -154,7 +154,7 @@ function RouteMotionPage({ dir, windowScroll }: { dir: Dir; windowScroll: boolea
           <div ref={scrollRef} className="sv-scroll">
             <RouteShell location={routeLocation} />
           </div>
-          <StageChrome />
+          <StageChrome showBottomNav={!windowScroll} />
         </ScrollerProvider>
       </RouteLayerLocationProvider>
     </motion.div>
@@ -173,8 +173,15 @@ export function RouteMotion() {
   const motionKey = routeMotionKey(location.pathname);
 
   return (
-    <AnimatePresence mode="sync" initial={false} custom={dir}>
-      <RouteMotionPage key={motionKey} dir={dir} windowScroll={windowScroll} />
-    </AnimatePresence>
+    <>
+      <AnimatePresence mode="sync" initial={false} custom={dir}>
+        <RouteMotionPage key={motionKey} dir={dir} windowScroll={windowScroll} />
+      </AnimatePresence>
+      {windowScroll ? (
+        <RouteLayerLocationProvider location={location}>
+          <BottomNav />
+        </RouteLayerLocationProvider>
+      ) : null}
+    </>
   );
 }

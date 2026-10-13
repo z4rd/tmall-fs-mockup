@@ -206,7 +206,7 @@ export const JORDAN_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
  * 所以这三张也要走 Jordan 那套 clip-path + 负 margin，不是「重导即净」。
  */
 export const ACG_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
-  highlight: 103,
+  highlight: 104,
   shoes: 105,
   scenes: 106,
 };
@@ -218,7 +218,7 @@ export const ACG_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
  */
 export const KIDS_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
   'big/weekly': 37,
-  'big/boys-shoes': 33,
+  'big/boys-shoes': 34,
   'big/boys-apparel': 35,
   'big/running': 32,
   'big/other': 403,
@@ -230,22 +230,19 @@ export const KIDS_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
  * 主店八张 sheet 的死区，按 `<族>/<分类>` 索引 —— `men` 既是族名（男子）又是双 11 的分类名
  * （男子折扣），只看 category 会串门。
  *
- * 2026-09-22 设计侧手删三个大店的 button nav 后重导实测，与 ACG / Kids 同一个毛病：
- * nav 删了但**画板高度没跟着收**，页尾留下 103–123 的空白。原先注释里「主店已由
- * `install_goods_png.py` 裁净」的说法只在裁底 70 的老流程下成立，现在走 `--no-tail-crop`，
- * 裁切统一由这张表承担。
+ * 部分 2026-10-12 新稿已经收干净，不再带旧版 100px 级尾部空白；这类页面必须取 0，
+ * 否则会直接裁掉右侧商品列底部内容。
  */
 export const NIKE_SHEET_BOTTOM_CLIP_PX: Record<string, number> = {
-  'men/new': 111,
-  'men/shoes': 123,
-  'men/running': 104,
-  'women/new': 111,
-  'women/shoes': 121,
-  'women/lifestyle': 104,
-  'kids/new': 103,
-  // commercial 新稿的 sheet 底部只带 71px 活底栏母版；旧值会多裁导航上方商品区。
-  'commercial/all': 71,
-  'commercial/men': 71,
+  'men/new': 0,
+  'men/shoes': 124,
+  'men/running': 0,
+  'women/new': 0,
+  'women/shoes': 0,
+  'women/lifestyle': 0,
+  'kids/new': 0,
+  'commercial/all': 0,
+  'commercial/men': 0,
 };
 
 export function goodsSheetBottomClipPx(
